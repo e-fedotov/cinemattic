@@ -1,3 +1,21 @@
 <resources>
     <string name="app_name">Cinemattic</string>
+
+    <string name="black_panther_title">Black Panther</string>
+    <string name="black_panther_year" translatable="false">2018</string>
+    <string name="black_panther_details">After his father\'s death, T\'Challa returns home to Wakanda to inherit his throne. However, a powerful enemy related to his family threatens to attack his nation.</string>
+
+    <string name="goonies_title">The Goonies</string>
+    <string name="goonies_year" translatable="false">1985</string>
+    <string name="goonies_description">A group of west coast kids facing their last days together before a development paves over their homes stumble onto evidence of pirate\'s treasure attracting the attention of a family of criminals.</string>
+
+    <string name="starwars7_title">Star Wars: Episode VII</string>
+    <string name="starwars7_year" translatable="false">2015</string>
+    <string name="starwars7_details">A new order threatens to destroy the New Republic. Finn, Rey and Poe, backed by the Resistance and the Republic, must find a way to stop them and find Luke, the last surviving Jedi.</string>
+
+    <string name="btn_details">Детали</string>
+    <string name="chсkbox_favorite">Нравится</string>
+    <string name="commentary_hint">Введите ваш комментарий</string>
+    <string name="btn_Back">Вернуться назад</string>
+    <string name="btnShare">Отправить другу</string>
 </resources>

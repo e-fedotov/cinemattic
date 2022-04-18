@@ -3,7 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/CodingProjects/cinemattic/app/src/main/res/layout/activity_main.xml" value="0.2611111111111111" />
+        <entry key="..\:/CodingProjects/cinemattic/app/src/main/res/drawable/title_background.xml" value="0.2645" />
+        <entry key="..\:/CodingProjects/cinemattic/app/src/main/res/layout/activity_details.xml" value="0.33" />
+        <entry key="..\:/CodingProjects/cinemattic/app/src/main/res/layout/activity_main.xml" value="0.4332579185520362" />
       </map>
     </option>
   </component>
