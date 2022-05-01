@@ -18,4 +18,5 @@
     <string name="commentary_hint">Введите ваш комментарий</string>
     <string name="btn_Back">Вернуться назад</string>
     <string name="btnShare">Отправить другу</string>
+    <string name="movie_poster_content_description">Movie Poster</string>
 </resources>
