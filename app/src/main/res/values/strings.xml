@@ -13,10 +13,11 @@
     <string name="starwars7_year" translatable="false">2015</string>
     <string name="starwars7_details">A new order threatens to destroy the New Republic. Finn, Rey and Poe, backed by the Resistance and the Republic, must find a way to stop them and find Luke, the last surviving Jedi.</string>
 
-    <string name="btn_details">Детали</string>
-    <string name="chсkbox_favorite">Нравится</string>
-    <string name="commentary_hint">Введите ваш комментарий</string>
-    <string name="btn_Back">Вернуться назад</string>
-    <string name="btnShare">Отправить другу</string>
+    <string name="btn_details">Details</string>
+    <string name="chсkbox_favorite">Favorite</string>
+    <string name="commentary_hint">Enter your comment</string>
+    <string name="btn_Back">Back</string>
+    <string name="btnShare">Share</string>
     <string name="movie_poster_content_description">Movie Poster</string>
+    <string name="title_activity_favorites">Favorites</string>
 </resources>

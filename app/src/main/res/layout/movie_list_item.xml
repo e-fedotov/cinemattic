@@ -12,15 +12,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!--Poster-->
-        <ImageView
-            android:id="@+id/poster"
-            android:contentDescription="@string/movie_poster_content_description"
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
-            tools:src="@tools:sample/backgrounds/scenic" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <!--Poster-->
+            <ImageView
+                android:id="@+id/poster"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/movie_poster_content_description"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:src="@tools:sample/backgrounds/scenic" />
+
+            <ru.evgenyfedotov.cinemattic.ui.FavoriteButton
+                android:id="@+id/favBtn"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:elevation="4dp"
+                android:gravity="center"
+                android:src="@drawable/ic_heart_selector"
+                android:stateListAnimator="@animator/fav_animation"
+                app:layout_constraintBottom_toBottomOf="@+id/poster"
+                app:layout_constraintEnd_toEndOf="@+id/poster"
+                app:layout_constraintStart_toStartOf="@+id/poster"
+                app:layout_constraintTop_toTopOf="@+id/poster" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
         <!--Title and year-->
@@ -50,6 +73,7 @@
                     android:textAppearance="?textAppearanceBody2"
                     tools:text="2022" />
 
+
             </LinearLayout>
 
             <Button
@@ -60,6 +84,7 @@
                 android:layout_marginStart="4dp"
                 android:layout_marginBottom="8dp"
                 android:text="@string/btn_details" />
+
         </LinearLayout>
 
 

@@ -4,8 +4,11 @@
 
     <stroke
         android:width="2dp"
-        android:dashGap="4dp"
-        android:dashWidth="2dp"
-        android:color="#424242" />
+        android:dashGap="2dp"
+        android:dashWidth="4dp"
+        android:color="#BCBCBC" />
+
+    <size
+        android:height="2dp" />
 
 </shape>

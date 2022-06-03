@@ -9,7 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Cinemattic">
-
+        <activity
+            android:name=".FavoritesActivity"
+            android:exported="false"
+            android:label="@string/title_activity_favorites" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -19,11 +22,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".DetailsActivity"
             android:exported="false" />
-
     </application>
 
 </manifest>
