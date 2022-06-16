@@ -1,97 +1,101 @@
 package ru.evgenyfedotov.cinemattic
 
 import android.content.Intent
-import android.content.res.Resources
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.widget.Button
-import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import ru.evgenyfedotov.cinemattic.data.MovieItem
+import ru.evgenyfedotov.cinemattic.mainrecycler.MovieItemListener
+import ru.evgenyfedotov.cinemattic.mainrecycler.MovieListAdapter
+import ru.evgenyfedotov.cinemattic.mainrecycler.MovieListItemDecorator
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var title1: TextView
-    private lateinit var title2: TextView
-    private lateinit var title3: TextView
+    private val recyclerView by lazy { findViewById<RecyclerView>(R.id.recyclerView) }
+
+    private val movieItems = mutableListOf<MovieItem>(
+        MovieItem(
+            titleId = R.string.black_panther_title,
+            posterId = R.drawable.poster_bpanther,
+            yearId = R.string.black_panther_year,
+            descriptionId = R.string.black_panther_details
+        ),
+        MovieItem(
+            titleId = R.string.goonies_title,
+            posterId = R.drawable.poster_goonies,
+            yearId = R.string.goonies_year,
+            descriptionId = R.string.goonies_description
+        ),
+        MovieItem(
+            titleId = R.string.starwars7_title,
+            posterId = R.drawable.poster_starwars7,
+            yearId = R.string.starwars7_year,
+            descriptionId = R.string.starwars7_details
+        ),
+    )
+
+    private val recyclerAdapter = MovieListAdapter(movieItems, object : MovieItemListener {
+        override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
+            if (isFavorite) {
+                FavoritesActivity.favorites.add(item)
+            } else {
+                FavoritesActivity.favorites.remove(item)
+            }
+        }
+    })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        title1 = findViewById(R.id.title1)
-        title2 = findViewById(R.id.title2)
-        title3 = findViewById(R.id.title3)
+        val layoutManager = when (resources.configuration.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> GridLayoutManager(this, 2)
+            else -> LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        }
 
-        val btn1: Button = findViewById(R.id.detailsBtn1)
-        val btn2: Button = findViewById(R.id.detailsBtn2)
-        val btn3: Button = findViewById(R.id.detailsBtn3)
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.favoritesMenuBtn -> {
+                    startActivity(Intent(this, FavoritesActivity::class.java))
+                    true
+                }
 
-        val intent = Intent(this, DetailsActivity::class.java)
-
-        val startDetailsActivity = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result->
-            val data = result.data
-            if (result.resultCode == RESULT_OK && data != null) {
-                Log.d(INTENT_RESULT_TAG, data.getBooleanExtra(DetailsActivity.CHECKBOX_KEY, false).toString())
-                data.getStringExtra(DetailsActivity.DESCRIPTION_KEY)?.let { Log.d(INTENT_RESULT_TAG, it) }
+                else -> false
             }
         }
 
-        btn1.setOnClickListener {
-            title1.setTextColor(ContextCompat.getColor(this, R.color.teal_200))
+        recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = recyclerAdapter
 
-            intent
-                .putExtra(POSTER_KEY, R.drawable.poster_bpanther)
-                .putExtra(TITLE_KEY, R.string.black_panther_title)
-                .putExtra(YEAR_KEY, R.string.black_panther_year)
-                .putExtra(DESCRIPTION_KEY, R.string.black_panther_details)
-
-            startDetailsActivity.launch(intent)
-        }
-
-        btn2.setOnClickListener {
-            title2.setTextColor(ContextCompat.getColor(this, R.color.teal_200))
-
-            intent
-                .putExtra(POSTER_KEY, R.drawable.poster_goonies)
-                .putExtra(TITLE_KEY, R.string.goonies_title)
-                .putExtra(YEAR_KEY, R.string.goonies_year)
-                .putExtra(DESCRIPTION_KEY, R.string.goonies_description)
-
-            startDetailsActivity.launch(intent)
-        }
-
-        btn3.setOnClickListener {
-            title3.setTextColor(ContextCompat.getColor(this, R.color.teal_200))
-
-            intent
-                .putExtra(POSTER_KEY, R.drawable.poster_starwars7)
-                .putExtra(TITLE_KEY, R.string.starwars7_title)
-                .putExtra(YEAR_KEY, R.string.starwars7_year)
-                .putExtra(DESCRIPTION_KEY, R.string.starwars7_details)
-
-            startDetailsActivity.launch(intent)
-        }
+        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) recyclerView.addItemDecoration(
+            MovieListItemDecorator(this)
+        )
 
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        outState.putInt("title1", title1.currentTextColor)
-        outState.putInt("title2", title2.currentTextColor)
-        outState.putInt("title3", title3.currentTextColor)
+    override fun onResume() {
+        recyclerView.adapter?.notifyDataSetChanged()
+        super.onResume()
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-
-        title1.setTextColor(savedInstanceState.getInt("title1"))
-        title2.setTextColor(savedInstanceState.getInt("title2"))
-        title3.setTextColor(savedInstanceState.getInt("title3"))
+    override fun onBackPressed() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Are you sure?")
+            .setMessage("Are you sure you want to quit this app?")
+            .setPositiveButton("Confirm") { dialog, which ->
+                super.onBackPressed()
+            }
+            .setNegativeButton("Cancel") { dialog, which ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
 
     companion object {
@@ -100,7 +104,6 @@ class MainActivity : AppCompatActivity() {
         const val TITLE_KEY = "title"
         const val YEAR_KEY = "year"
         const val DESCRIPTION_KEY = "description"
-
     }
 
 }

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="4dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+
+            <!--Poster-->
+            <ImageView
+                android:id="@+id/poster"
+                android:layout_width="100dp"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/movie_poster_content_description"
+                android:scaleType="centerCrop"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:src="@tools:sample/backgrounds/scenic" />
+
+            <ru.evgenyfedotov.cinemattic.ui.FavoriteButton
+                android:id="@+id/favBtn"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:elevation="4dp"
+                android:gravity="center"
+                android:src="@drawable/ic_heart_selector"
+                android:stateListAnimator="@animator/fav_animation"
+                app:layout_constraintBottom_toBottomOf="@+id/poster"
+                app:layout_constraintEnd_toEndOf="@+id/poster"
+                app:layout_constraintStart_toStartOf="@+id/poster"
+                app:layout_constraintTop_toTopOf="@+id/poster" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <!--Title and year-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceHeadline6"
+                    android:textStyle="bold"
+                    tools:text="Movie title" />
+
+                <TextView
+                    android:id="@+id/year"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?textAppearanceBody2"
+                    tools:text="2022" />
+
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/detailsBtn"
+                style="?borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/btn_details" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
