@@ -8,10 +8,11 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".DetailsActivity">
+        tools:context=".DetailsFragment">
 
         <ImageView
             android:id="@+id/detailsPoster"
+            android:transitionName="moviePoster"
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:scaleType="centerCrop"

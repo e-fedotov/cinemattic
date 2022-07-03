@@ -24,6 +24,7 @@
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/movie_poster_content_description"
                 android:scaleType="centerCrop"
+                android:transitionName="moviePoster"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

@@ -20,4 +20,5 @@
     <string name="btnShare">Share</string>
     <string name="movie_poster_content_description">Movie Poster</string>
     <string name="title_activity_favorites">Favorites</string>
+
 </resources>

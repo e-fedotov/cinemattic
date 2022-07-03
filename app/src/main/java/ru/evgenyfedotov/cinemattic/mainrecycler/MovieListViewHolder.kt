@@ -1,14 +1,16 @@
 package ru.evgenyfedotov.cinemattic.mainrecycler
 
 import android.content.Intent
+import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import ru.evgenyfedotov.cinemattic.DetailsActivity
-import ru.evgenyfedotov.cinemattic.FavoritesActivity
+import ru.evgenyfedotov.cinemattic.DetailsFragment
+import ru.evgenyfedotov.cinemattic.FavoritesFragment
 import ru.evgenyfedotov.cinemattic.ui.FavoriteButton
 import ru.evgenyfedotov.cinemattic.MainActivity
 import ru.evgenyfedotov.cinemattic.R
@@ -27,24 +29,22 @@ class MovieListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         year.text = itemView.context.getString(movie.yearId)
         poster.setImageDrawable(AppCompatResources.getDrawable(itemView.context, movie.posterId))
 
-        if (FavoritesActivity.favorites.find { item -> movie.equals(item) } == movie) {
-            favBtn.isChecked = true
-        } else {
-            favBtn.isChecked = false
-        }
+        favBtn.isChecked = FavoritesFragment.favorites.find { item -> movie.equals(item) } == movie
         favBtn.setOnClickListener {
             listener.onFavoriteClick(movie, favBtn.isChecked, adapterPosition)
         }
 
-        btn.setOnClickListener {
-            val intent = Intent(itemView.context, DetailsActivity::class.java)
-            intent
-                .putExtra(MainActivity.POSTER_KEY, movie.posterId)
-                .putExtra(MainActivity.TITLE_KEY, movie.titleId)
-                .putExtra(MainActivity.DESCRIPTION_KEY, movie.descriptionId)
-                .putExtra(MainActivity.YEAR_KEY, movie.yearId)
+        btn.setOnClickListener { view ->
 
-            itemView.context.startActivity(intent)
+            val args = Bundle()
+            args.putInt(MainActivity.POSTER_KEY, movie.posterId)
+            args.putInt(MainActivity.POSTER_KEY, movie.posterId)
+            args.putInt(MainActivity.TITLE_KEY, movie.titleId)
+            args.putInt(MainActivity.DESCRIPTION_KEY, movie.descriptionId)
+            args.putInt(MainActivity.YEAR_KEY, movie.yearId)
+
+            view.findNavController()
+                .navigate(R.id.detailsFragment, args)
         }
 
 
