@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cinemattic">
         <activity
-            android:name=".FavoritesActivity"
+            android:name=".FavoritesFragment"
             android:exported="false"
             android:label="@string/title_activity_favorites" />
         <activity
@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DetailsActivity"
+            android:name=".DetailsFragment"
             android:exported="false" />
     </application>
 

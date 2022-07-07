@@ -1,80 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:context=".DetailsActivity">
-
-        <ImageView
-            android:id="@+id/detailsPoster"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:scaleType="centerCrop"
-            android:contentDescription="Movie title image"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@tools:sample/avatars" />
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/detailsTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:textAppearance="?textAppearanceHeadline4"
             android:textColor="?colorOnBackground"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/detailsPoster"
             tools:text="@tools:sample/cities" />
 
         <TextView
             android:id="@+id/detailsYear"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/detailsTitle"
             android:layout_marginStart="16dp"
             android:textAppearance="?textAppearanceBody2"
             android:textColor="?colorOnBackground"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/detailsTitle"
             tools:text="@tools:sample/lorem" />
 
         <TextView
             android:id="@+id/detailsDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/detailsYear"
             android:layout_marginStart="16dp"
             android:layout_marginTop="32dp"
             android:layout_marginEnd="16dp"
             android:textAppearance="?textAppearanceBody1"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/detailsYear"
             tools:text="@tools:sample/lorem" />
 
         <CheckBox
             android:id="@+id/checkBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/detailsDescription"
             android:layout_marginStart="8dp"
             android:layout_marginTop="32dp"
-            android:text="@string/chсkbox_favorite"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/detailsDescription" />
+            android:text="@string/chсkbox_favorite" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/commentaryLayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/checkBox"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:hint="@string/commentary_hint"
-            app:layout_constraintTop_toBottomOf="@id/checkBox">
+            android:hint="@string/commentary_hint">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/commentary"
@@ -87,19 +72,20 @@
             android:id="@+id/btnShare"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="@string/btnShare"
-            app:layout_constraintTop_toBottomOf="@+id/commentaryLayout" />
+            android:layout_below="@id/commentaryLayout"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/btnShare" />
 
         <Button
             android:id="@+id/btnBack"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/btnShare"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/btn_Back"
-            app:layout_constraintTop_toBottomOf="@+id/btnShare" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
+            android:text="@string/btn_Back" />
+    </RelativeLayout>
+</androidx.core.widget.NestedScrollView>

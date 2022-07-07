@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainListFragment">
+
+    <fragment
+        android:id="@+id/mainListFragment"
+        android:name="ru.evgenyfedotov.cinemattic.MainListFragment"
+        android:label="MainListFragment" >
+        <action
+            android:id="@+id/action_mainListFragment_to_detailsFragment"
+            app:destination="@id/detailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="ru.evgenyfedotov.cinemattic.FavoritesFragment"
+        android:label="FavoritesFragment" />
+    <fragment
+        android:id="@+id/detailsFragment"
+        android:name="ru.evgenyfedotov.cinemattic.DetailsFragment"
+        android:label="DetailsFragment" />
+</navigation>

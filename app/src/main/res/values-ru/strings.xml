@@ -14,4 +14,7 @@
     <string name="btnShare">Отправить другу</string>
     <string name="movie_poster_content_description">Постер фильма</string>
     <string name="title_activity_favorites">Избранное</string>
+    <string name="snackbar_favorites_removed">Фильм убран из избранного</string>
+    <string name="snackbar_favorites_added">Фильм добавлен в избранное</string>
+    <string name="undo">Отменить</string>
 </resources>
