@@ -44,9 +44,9 @@ class FavoritesFragment : Fragment() {
 
             }
         })
-        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) recyclerView.addItemDecoration(
-            MovieListItemDecorator(view.context)
-        )
+//        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) recyclerView.addItemDecoration(
+//            MovieListItemDecorator(view.context)
+//        )
 
     }
 

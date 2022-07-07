@@ -1,17 +1,19 @@
 package ru.evgenyfedotov.cinemattic
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.ColorFilter
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
@@ -38,6 +40,7 @@ class DetailsFragment : Fragment() {
         val commentaryField: TextInputEditText = view.findViewById(R.id.commentary)
         val btnBack: Button = view.findViewById(R.id.btnBack)
         val btnShare: Button = view.findViewById(R.id.btnShare)
+        val toolbar: Toolbar = view.findViewById(R.id.toolbar)
 
         arguments?.let { args ->
             poster.setImageDrawable(
@@ -48,7 +51,12 @@ class DetailsFragment : Fragment() {
             )
 
             Log.d("Test ---------->", args.toString())
-            activity?.title = view.context.getString(args.getInt(MainActivity.TITLE_KEY))
+//            activity?.title = view.context.getString(args.getInt(MainActivity.TITLE_KEY))
+            toolbar.title = view.context.getString(args.getInt(MainActivity.TITLE_KEY))
+            toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
+            toolbar.navigationIcon?.colorFilter = PorterDuffColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_ATOP)
+            toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+
             title.text = view.context.getString(args.getInt(MainActivity.TITLE_KEY))
             year.text = view.context.getString(args.getInt(MainActivity.YEAR_KEY))
             description.text = view.context.getString(args.getInt(MainActivity.DESCRIPTION_KEY))

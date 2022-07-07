@@ -46,9 +46,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.title = "SD"
+//        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+//        setSupportActionBar(toolbar)
+//        supportActionBar?.title = "SD"
 
     }
 

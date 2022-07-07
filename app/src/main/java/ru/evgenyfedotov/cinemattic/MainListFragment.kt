@@ -67,10 +67,10 @@ class MainListFragment : Fragment() {
 
         recyclerView.adapter = recyclerAdapter
         recyclerView.layoutManager = layoutManager
-
-        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) recyclerView.addItemDecoration(
-            MovieListItemDecorator(view.context)
-        )
+//
+//        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) recyclerView.addItemDecoration(
+//            MovieListItemDecorator(view.context)
+//        )
 
     }
 
