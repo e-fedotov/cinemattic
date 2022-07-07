@@ -7,9 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.snackbar.Snackbar
 import ru.evgenyfedotov.cinemattic.data.MovieItem
 import ru.evgenyfedotov.cinemattic.mainrecycler.MovieItemListener
 import ru.evgenyfedotov.cinemattic.mainrecycler.MovieListAdapter
@@ -49,13 +52,29 @@ class MainListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
         val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
         val recyclerAdapter = MovieListAdapter(movieItems, object : MovieItemListener {
             override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
                 if (isFavorite) {
+
                     FavoritesFragment.favorites.add(item)
+
+                    Snackbar.make(view.findViewById(R.id.constraintLayout), getString(R.string.snackbar_favorites_added), Snackbar.LENGTH_LONG)
+                        .setAction(getString(R.string.undo)) {
+                            FavoritesFragment.favorites.remove(item)
+                            recyclerView.adapter?.notifyItemChanged(position)
+                        }
+                        .show()
+
                 } else {
                     FavoritesFragment.favorites.remove(item)
+                    Snackbar.make(view.findViewById(R.id.constraintLayout), getString(R.string.snackbar_favorites_removed), Snackbar.LENGTH_LONG)
+                        .setAction(getString(R.string.undo)) {
+                            FavoritesFragment.favorites.add(item)
+                            recyclerView.adapter?.notifyItemChanged(position)
+                        }
+                        .show()
                 }
             }
         })
@@ -67,10 +86,6 @@ class MainListFragment : Fragment() {
 
         recyclerView.adapter = recyclerAdapter
         recyclerView.layoutManager = layoutManager
-//
-//        if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) recyclerView.addItemDecoration(
-//            MovieListItemDecorator(view.context)
-//        )
 
     }
 
@@ -78,11 +93,5 @@ class MainListFragment : Fragment() {
         super.onStart()
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.app_name)
     }
-
-//    override fun onResume() {
-//        recyclerView.adapter?.notifyDataSetChanged()
-//        super.onResume()
-//    }
-
 
 }

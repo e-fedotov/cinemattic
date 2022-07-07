@@ -58,17 +58,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Are you sure?")
-            .setMessage("Are you sure you want to quit this app?")
-            .setPositiveButton("Confirm") { dialog, which ->
-                super.onBackPressed()
+        val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
+        navHost?.let { navFragment ->
+            navFragment.childFragmentManager.primaryNavigationFragment?.let { fragment ->
+                if (fragment is DetailsFragment) {
+                    supportFragmentManager.popBackStack()
+                } else {
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle("Are you sure?")
+                        .setMessage("Are you sure you want to quit this app?")
+                        .setPositiveButton("Confirm") { dialog, which ->
+                            super.onBackPressed()
+                        }
+                        .setNegativeButton("Cancel") { dialog, which ->
+                            dialog.dismiss()
+                        }
+                        .create()
+                        .show()
+                }
             }
-            .setNegativeButton("Cancel") { dialog, which ->
-                dialog.dismiss()
-            }
-            .create()
-            .show()
+        }
+
     }
 
     companion object {

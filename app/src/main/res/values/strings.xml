@@ -20,5 +20,8 @@
     <string name="btnShare">Share</string>
     <string name="movie_poster_content_description">Movie Poster</string>
     <string name="title_activity_favorites">Favorites</string>
+    <string name="snackbar_favorites_removed">Movie removed from favorites</string>
+    <string name="snackbar_favorites_added">Movie added to Favorites</string>
+    <string name="undo">Undo</string>
 
 </resources>

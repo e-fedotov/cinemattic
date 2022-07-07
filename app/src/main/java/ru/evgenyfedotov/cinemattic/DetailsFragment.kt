@@ -10,15 +10,32 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.transition.ChangeBounds
+import androidx.transition.TransitionInflater
 import com.google.android.material.textfield.TextInputEditText
+import java.util.concurrent.TimeUnit
 
 class DetailsFragment : Fragment() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        sharedElementEnterTransition = ChangeBounds().apply {
+            duration = 750
+            interpolator = AccelerateDecelerateInterpolator()
+        }
+        sharedElementReturnTransition = ChangeBounds().apply {
+            duration = 750
+            interpolator = AccelerateDecelerateInterpolator()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,8 +47,9 @@ class DetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+postponeEnterTransition()
         val poster: ImageView = view.findViewById(R.id.detailsPoster)
+
         val title: TextView = view.findViewById(R.id.detailsTitle)
         val year: TextView = view.findViewById(R.id.detailsYear)
         val description: TextView = view.findViewById(R.id.detailsDescription)
@@ -50,8 +68,6 @@ class DetailsFragment : Fragment() {
                 )
             )
 
-            Log.d("Test ---------->", args.toString())
-//            activity?.title = view.context.getString(args.getInt(MainActivity.TITLE_KEY))
             toolbar.title = view.context.getString(args.getInt(MainActivity.TITLE_KEY))
             toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
             toolbar.navigationIcon?.colorFilter = PorterDuffColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_ATOP)
@@ -78,6 +94,8 @@ class DetailsFragment : Fragment() {
             findNavController().popBackStack()
 
         }
+
+        startPostponedEnterTransition()
 
     }
 

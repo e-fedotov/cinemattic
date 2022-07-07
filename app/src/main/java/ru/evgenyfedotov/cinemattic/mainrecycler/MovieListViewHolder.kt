@@ -7,7 +7,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.view.ViewCompat
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.recyclerview.widget.RecyclerView
 import ru.evgenyfedotov.cinemattic.DetailsFragment
 import ru.evgenyfedotov.cinemattic.FavoritesFragment
@@ -43,8 +45,12 @@ class MovieListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             args.putInt(MainActivity.DESCRIPTION_KEY, movie.descriptionId)
             args.putInt(MainActivity.YEAR_KEY, movie.yearId)
 
+            val extras = FragmentNavigatorExtras(
+                title to "moviePoster"
+            )
+
             view.findNavController()
-                .navigate(R.id.detailsFragment, args)
+                .navigate(R.id.detailsFragment, args, null, extras)
         }
 
 
