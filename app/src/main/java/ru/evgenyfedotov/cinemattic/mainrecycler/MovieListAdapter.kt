@@ -1,12 +1,14 @@
 package ru.evgenyfedotov.cinemattic.mainrecycler
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import ru.evgenyfedotov.cinemattic.R
-import ru.evgenyfedotov.cinemattic.data.MovieItem
+import ru.evgenyfedotov.cinemattic.model.MovieItem
 
-class MovieListAdapter(private val items: List<MovieItem>, private val listener: MovieItemListener) :
+class MovieListAdapter(private val items: MutableList<MovieItem>, private val listener: MovieItemListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -21,6 +23,14 @@ class MovieListAdapter(private val items: List<MovieItem>, private val listener:
     }
 
     override fun getItemCount(): Int = items.size
+
+    fun updateItems(newItems: List<MovieItem>) {
+        val diffResult = DiffUtil.calculateDiff(FavoritesDiffUtilCallback(items, newItems))
+        items.clear()
+        items.addAll(newItems)
+        diffResult.dispatchUpdatesTo(this)
+    }
+
 }
 
 interface MovieItemListener {

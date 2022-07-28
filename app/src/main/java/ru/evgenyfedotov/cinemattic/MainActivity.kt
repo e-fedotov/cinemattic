@@ -1,22 +1,12 @@
 package ru.evgenyfedotov.cinemattic
 
-import android.content.Intent
-import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import ru.evgenyfedotov.cinemattic.data.MovieItem
-import ru.evgenyfedotov.cinemattic.mainrecycler.MovieItemListener
-import ru.evgenyfedotov.cinemattic.mainrecycler.MovieListAdapter
-import ru.evgenyfedotov.cinemattic.mainrecycler.MovieListItemDecorator
 
 class MainActivity : AppCompatActivity() {
 
@@ -68,7 +58,7 @@ class MainActivity : AppCompatActivity() {
                         .setTitle("Are you sure?")
                         .setMessage("Are you sure you want to quit this app?")
                         .setPositiveButton("Confirm") { dialog, which ->
-                            super.onBackPressed()
+                            super.finish()
                         }
                         .setNegativeButton("Cancel") { dialog, which ->
                             dialog.dismiss()
@@ -87,6 +77,7 @@ class MainActivity : AppCompatActivity() {
         const val TITLE_KEY = "title"
         const val YEAR_KEY = "year"
         const val DESCRIPTION_KEY = "description"
+        const val MOVIE_ID = "movieId"
     }
 
 }

@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionInflater
+import com.bumptech.glide.Glide
 import com.google.android.material.textfield.TextInputEditText
 import java.util.concurrent.TimeUnit
 
@@ -27,14 +28,7 @@ class DetailsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        sharedElementEnterTransition = ChangeBounds().apply {
-            duration = 750
-            interpolator = AccelerateDecelerateInterpolator()
-        }
-        sharedElementReturnTransition = ChangeBounds().apply {
-            duration = 750
-            interpolator = AccelerateDecelerateInterpolator()
-        }
+        sharedElementEnterTransition = TransitionInflater.from(requireContext()).inflateTransition(R.transition.shared_image)
     }
 
     override fun onCreateView(
@@ -47,7 +41,6 @@ class DetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-postponeEnterTransition()
         val poster: ImageView = view.findViewById(R.id.detailsPoster)
 
         val title: TextView = view.findViewById(R.id.detailsTitle)
@@ -60,22 +53,30 @@ postponeEnterTransition()
         val btnShare: Button = view.findViewById(R.id.btnShare)
         val toolbar: Toolbar = view.findViewById(R.id.toolbar)
 
-        arguments?.let { args ->
-            poster.setImageDrawable(
-                AppCompatResources.getDrawable(
-                    view.context,
-                    args.getInt(MainActivity.POSTER_KEY)
-                )
-            )
 
-            toolbar.title = view.context.getString(args.getInt(MainActivity.TITLE_KEY))
+        postponeEnterTransition()
+        arguments?.let { args ->
+//            poster.setImageDrawable(
+//                AppCompatResources.getDrawable(
+//                    view.context,
+//                    args.getInt(MainActivity.POSTER_KEY)
+//                )
+//            )
+
+            Glide.with(view)
+                .load(args.getString(MainActivity.POSTER_KEY))
+                .into(poster)
+
+            poster.transitionName = args.getString(MainActivity.MOVIE_ID)
+
+            toolbar.title = args.getString(MainActivity.TITLE_KEY)
             toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
             toolbar.navigationIcon?.colorFilter = PorterDuffColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_ATOP)
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-            title.text = view.context.getString(args.getInt(MainActivity.TITLE_KEY))
-            year.text = view.context.getString(args.getInt(MainActivity.YEAR_KEY))
-            description.text = view.context.getString(args.getInt(MainActivity.DESCRIPTION_KEY))
+            title.text = args.getString(MainActivity.TITLE_KEY)
+            year.text = args.getString(MainActivity.YEAR_KEY)
+            description.text = args.getString(MainActivity.DESCRIPTION_KEY)
         }
 
         val data = Intent()
@@ -92,7 +93,6 @@ postponeEnterTransition()
 
         btnBack.setOnClickListener {
             findNavController().popBackStack()
-
         }
 
         startPostponedEnterTransition()
