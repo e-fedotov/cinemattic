@@ -25,7 +25,7 @@ class MovieRepository @Inject constructor(
     private val getTopMoviesPagingSource: GetTopMoviesPagingSource
 ) {
 
-    suspend fun getTopMovies(page: Int): Flow<Result<MovieSearchResponse>?> {
+    suspend fun getTopMovies(page: Int): Flow<Result<List<MovieItem>>?> {
         return flow {
             emit(getCachedMovies())
             emit(Result.loading())
@@ -38,22 +38,27 @@ class MovieRepository @Inject constructor(
                 }
             }
 
-            emit(result)
+//            emit(result)
+            val newResult = Result(result.status, result.data?.films, result.error, result.message)
+            emit(newResult)
 
         }.distinctUntilChanged()
             .flowOn(Dispatchers.IO)
     }
 
-    private fun getCachedMovies(): Result<MovieSearchResponse>? {
+    private fun getCachedMovies(): Result<List<MovieItem>>? {
+//        return movieCacheDao.getAllMovies()?.let {
+//            Result.success(
+//                MovieSearchResponse(
+//                    films = it,
+//                    keyword = "",
+//                    pagesCount = -1,
+//                    searchFilmsCountResult = -1
+//                )
+//            )
+//        }
         return movieCacheDao.getAllMovies()?.let {
-            Result.success(
-                MovieSearchResponse(
-                    films = it,
-                    keyword = "",
-                    pagesCount = -1,
-                    searchFilmsCountResult = -1
-                )
-            )
+            Result.success(it)
         }
     }
 

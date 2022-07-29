@@ -48,7 +48,7 @@ class MainListFragment : Fragment() {
             .inject(this)
         initRecycler(view)
 
-        viewModel.fetchTopMovies(1)
+//        viewModel.fetchTopMovies(1)
 
         return view
     }

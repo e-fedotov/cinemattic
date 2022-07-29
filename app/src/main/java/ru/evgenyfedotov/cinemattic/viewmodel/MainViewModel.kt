@@ -14,9 +14,12 @@ import javax.inject.Inject
 
 class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() {
 
-    private val mMovieSearchResponse = MutableLiveData<ru.evgenyfedotov.cinemattic.model.Result<List<MovieItem>>>()
+    private val mMovieSearchResponse =
+        MutableLiveData<ru.evgenyfedotov.cinemattic.model.Result<List<MovieItem>>>()
     val movieSearchResponse: LiveData<Result<List<MovieItem>>>
         get() = mMovieSearchResponse
+
+    private var mutableMoviesList = mutableListOf<MovieItem>()
 
     private val mFavoriteMovies = MutableLiveData<List<MovieItem>>()
     val favoriteMovies: LiveData<List<MovieItem>>
@@ -26,6 +29,9 @@ class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() 
 
     init {
         getFavoriteMoviesList()
+
+        mutableMoviesList.clear()
+        fetchTopMovies(1)
     }
 
     fun getFavoriteMoviesList() {
@@ -41,10 +47,25 @@ class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() 
 
         viewModelScope.launch {
             movieRepository.getTopMovies(page).collect() {
+//                if (it != null) {
+//                    mMovieSearchResponse.value = ru.evgenyfedotov.cinemattic.model.Result(it.status,
+//                        it.data?.films, it.error, it.message)
+//                }
                 if (it != null) {
-                    mMovieSearchResponse.value = ru.evgenyfedotov.cinemattic.model.Result(it.status,
-                        it.data?.films, it.error, it.message)
+                    it.data?.forEach {
+
+//                        mutableMoviesList.removeAll { item ->
+//                            it.filmId == mutableMoviesList.find {
+//                                it.filmId == item.filmId
+//                            }?.filmId
+//                        }
+
+                        mutableMoviesList.add(it)
+                    }
+                    mMovieSearchResponse.value =
+                        Result(it.status, mutableMoviesList, it.error, it.message)
                 }
+
             }
         }
     }
