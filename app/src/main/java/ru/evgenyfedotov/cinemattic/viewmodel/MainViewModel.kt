@@ -2,7 +2,11 @@ package ru.evgenyfedotov.cinemattic.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.*
+import androidx.paging.PagingData
+import androidx.paging.map
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.evgenyfedotov.cinemattic.data.MovieRepository
 import ru.evgenyfedotov.cinemattic.model.MovieItem
@@ -19,6 +23,10 @@ class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() 
     val movieSearchResponse: LiveData<Result<List<MovieItem>>>
         get() = mMovieSearchResponse
 
+    private val mPagingData = MutableLiveData<PagingData<MovieItem>>()
+    val pagingData: LiveData<PagingData<MovieItem>>
+        get() = mPagingData
+
     private var mutableMoviesList = mutableListOf<MovieItem>()
 
     private val mFavoriteMovies = MutableLiveData<List<MovieItem>>()
@@ -29,9 +37,17 @@ class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() 
 
     init {
         getFavoriteMoviesList()
-
         mutableMoviesList.clear()
         fetchTopMovies(1)
+    }
+
+    fun getPagingMovies(): Flow<PagingData<MovieItem>> {
+//        viewModelScope.launch {
+//            movieRepository.getPagingMovies().collect() {
+//                mPagingData.value = it
+//            }
+//        }
+        return movieRepository.getPagingMovies()
     }
 
     fun getFavoriteMoviesList() {

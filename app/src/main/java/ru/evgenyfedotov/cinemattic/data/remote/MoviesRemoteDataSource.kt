@@ -21,9 +21,6 @@ class MoviesRemoteDataSource @Inject constructor(private val retrofit: Retrofit)
         ).flow
     }
 
-    /**
-     * let's define page size, page size is the only required param, rest is optional
-     */
     fun getDefaultPageConfig(): PagingConfig {
         return PagingConfig(pageSize = DEFAULT_PAGE_SIZE, enablePlaceholders = false)
     }

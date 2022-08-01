@@ -9,16 +9,22 @@ import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import ru.evgenyfedotov.cinemattic.di.DaggerMainListFragmentComponent
-import ru.evgenyfedotov.cinemattic.mainrecycler.EndlessRecyclerViewScrollListener
-import ru.evgenyfedotov.cinemattic.mainrecycler.EndlessRecyclerViewScrollListenerImpl
-import ru.evgenyfedotov.cinemattic.mainrecycler.MovieItemListener
-import ru.evgenyfedotov.cinemattic.mainrecycler.MovieListAdapter
+import ru.evgenyfedotov.cinemattic.mainrecycler.*
 import ru.evgenyfedotov.cinemattic.model.MovieItem
 import ru.evgenyfedotov.cinemattic.model.Result
 import ru.evgenyfedotov.cinemattic.viewmodel.MainViewModel
@@ -28,10 +34,13 @@ import javax.inject.Inject
 class MainListFragment : Fragment() {
 
     private var movieItems = listOf<MovieItem>()
+
     @Inject
     lateinit var mainViewModelFactory: MainViewModelFactory
     private val viewModel: MainViewModel by viewModels { mainViewModelFactory }
-    private lateinit var adapter: MovieListAdapter
+    private lateinit var adapter: MovieListPagingAdapter
+
+    //    private lateinit var adapter: MovieListAdapter
     private lateinit var recyclerView: RecyclerView
     private val list = ArrayList<MovieItem>()
     private lateinit var scrollListener: EndlessRecyclerViewScrollListenerImpl
@@ -66,34 +75,55 @@ class MainListFragment : Fragment() {
             }
         }
 
-        viewModel.movieSearchResponse.observe(viewLifecycleOwner) { response ->
-            when (response.status) {
-                Result.Status.SUCCESS -> {
-                    response.data?.let {
-                        adapter.updateItems(it)
-                    }
-                    loading.visibility = View.GONE
-                }
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                adapter.loadStateFlow.collect {
+                    loading.isVisible = it.source.append is LoadState.Loading
+                    loading.isVisible = it.source.prepend is LoadState.Loading
 
-                Result.Status.ERROR -> {
-                    response.message?.let {
-                        Snackbar.make(view, it, Snackbar.LENGTH_LONG).show()
+                    if (it.source.append is LoadState.Error || it.source.prepend is LoadState.Error) {
+                        Snackbar.make(view, "Could not get items, try again", Snackbar.LENGTH_LONG).setAction("Retry") {
+                            adapter.retry()
+                        }
                     }
-                    loading.visibility = View.GONE
-                }
-
-                Result.Status.LOADING -> {
-                    loading.visibility = View.VISIBLE
                 }
             }
         }
+
+        lifecycleScope.launch {
+            viewModel.getPagingMovies().distinctUntilChanged().collectLatest { data ->
+                adapter.submitData(viewLifecycleOwner.lifecycle, data)
+            }
+        }
+
+//        viewModel.movieSearchResponse.observe(viewLifecycleOwner) { response ->
+//            when (response.status) {
+//                Result.Status.SUCCESS -> {
+//                    response.data?.let {
+//                        adapter.updateItems(it)
+//                    }
+//                    loading.visibility = View.GONE
+//                }
+//
+//                Result.Status.ERROR -> {
+//                    response.message?.let {
+//                        Snackbar.make(view, it, Snackbar.LENGTH_LONG).show()
+//                    }
+//                    loading.visibility = View.GONE
+//                }
+//
+//                Result.Status.LOADING -> {
+//                    loading.visibility = View.VISIBLE
+//                }
+//            }
+//        }
 
     }
 
     private fun initRecycler(view: View) {
         recyclerView = view.findViewById(R.id.recyclerView)
 
-        adapter = MovieListAdapter(list, object : MovieItemListener {
+        adapter = MovieListPagingAdapter(object : MovieItemListener {
             override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
                 if (isFavorite) {
 
@@ -134,12 +164,12 @@ class MainListFragment : Fragment() {
             else -> LinearLayoutManager(view.context, LinearLayoutManager.VERTICAL, false)
         }
 
-        scrollListener = EndlessRecyclerViewScrollListenerImpl(layoutManager, viewModel)
+//        scrollListener = EndlessRecyclerViewScrollListenerImpl(layoutManager, viewModel)
 
         recyclerView.adapter = adapter
         recyclerView.layoutManager = layoutManager
 
-        recyclerView.addOnScrollListener(scrollListener)
+//        recyclerView.addOnScrollListener(scrollListener)
     }
 
     override fun onStart() {
