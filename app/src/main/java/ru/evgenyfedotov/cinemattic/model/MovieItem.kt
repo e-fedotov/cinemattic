@@ -13,11 +13,12 @@ import com.google.gson.annotations.SerializedName
 )
 
 data class MovieItem(
+    @PrimaryKey
     @SerializedName("filmId")
     val filmId: Int,
 
-    @PrimaryKey(autoGenerate = true)
-    val dbId: Int,
+//    @PrimaryKey(autoGenerate = true)
+//    val dbId: Int,
 
     @SerializedName("nameRu") val nameRu: String?,
     @SerializedName("nameEn") val nameEn: String?,
@@ -32,5 +33,6 @@ data class MovieItem(
     @SerializedName("posterUrl") val posterUrl: String,
     @SerializedName("posterUrlPreview") val posterUrlPreview: String,
 
-    var isFavorite: Boolean = false
+    var page: Int?
+//    var isFavorite: Boolean = false
 )

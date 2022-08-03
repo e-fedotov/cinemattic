@@ -23,7 +23,7 @@ class GetTopMoviesPagingSource @Inject constructor(private val retrofit: Retrofi
     override fun getRefreshKey(state: PagingState<Int, MovieItem>): Int? {
         val anchorPosition = state.anchorPosition ?: return null
         val item = state.closestItemToPosition(anchorPosition) ?: return null
-        return ensureValidKey(key = item.dbId - (state.config.pageSize / 2))
+        return ensureValidKey(key = item.filmId - (state.config.pageSize / 2))
     }
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, MovieItem> {

@@ -82,9 +82,10 @@ class MainListFragment : Fragment() {
                     loading.isVisible = it.source.prepend is LoadState.Loading
 
                     if (it.source.append is LoadState.Error || it.source.prepend is LoadState.Error) {
-                        Snackbar.make(view, "Could not get items, try again", Snackbar.LENGTH_LONG).setAction("Retry") {
-                            adapter.retry()
-                        }
+                        Snackbar.make(view, "Could not get items, try again", Snackbar.LENGTH_LONG)
+                            .setAction("Retry") {
+                                adapter.retry()
+                            }
                     }
                 }
             }
@@ -92,7 +93,7 @@ class MainListFragment : Fragment() {
 
         lifecycleScope.launch {
             viewModel.getPagingMovies().distinctUntilChanged().collectLatest { data ->
-                adapter.submitData(viewLifecycleOwner.lifecycle, data)
+                adapter.submitData(lifecycle, data)
             }
         }
 

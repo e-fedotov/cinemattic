@@ -8,6 +8,7 @@ import dagger.Provides
 import ru.evgenyfedotov.cinemattic.data.local.AppDatabase
 import ru.evgenyfedotov.cinemattic.data.local.FavoriteMoviesDao
 import ru.evgenyfedotov.cinemattic.data.local.MovieCacheDao
+import ru.evgenyfedotov.cinemattic.data.local.PagingKeysDao
 import javax.inject.Singleton
 
 @Module
@@ -33,6 +34,11 @@ object DatabaseModule {
     @Provides
     fun provideFavoriteMovieDao(appDatabase: AppDatabase): FavoriteMoviesDao {
         return appDatabase.favoriteMoviesDao()
+    }
+
+    @Provides
+    fun providePagingKeysDao(appDatabase: AppDatabase): PagingKeysDao {
+        return appDatabase.pagingKeysDao()
     }
 
 }

@@ -29,6 +29,10 @@ class MovieRepository @Inject constructor(
         return remoteDataSource.getTopMoviesPagingFlow()
     }
 
+    fun getPagingMoviesCached(): Flow<PagingData<MovieItem>> {
+        return remoteDataSource.getPagingMoviesDb()
+    }
+
     suspend fun getTopMovies(page: Int): Flow<Result<List<MovieItem>>?> {
         return flow {
             emit(getCachedMovies())

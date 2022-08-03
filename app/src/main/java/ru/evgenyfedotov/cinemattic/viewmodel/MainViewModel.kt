@@ -3,6 +3,7 @@ package ru.evgenyfedotov.cinemattic.viewmodel
 import android.util.Log
 import androidx.lifecycle.*
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -47,7 +48,8 @@ class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() 
 //                mPagingData.value = it
 //            }
 //        }
-        return movieRepository.getPagingMovies()
+//        return movieRepository.getPagingMovies()
+        return movieRepository.getPagingMoviesCached().cachedIn(viewModelScope)
     }
 
     fun getFavoriteMoviesList() {
