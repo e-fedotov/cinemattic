@@ -8,17 +8,17 @@ import com.google.gson.annotations.SerializedName
 @Entity(
     tableName = "movies_cache",
     indices = [
-        Index(value = ["filmId"])
+        Index(value = ["filmId"], unique = true)
     ]
 )
 
 data class MovieItem(
-    @PrimaryKey
+//    @PrimaryKey
     @SerializedName("filmId")
     val filmId: Int,
 
-//    @PrimaryKey(autoGenerate = true)
-//    val dbId: Int,
+    @PrimaryKey(autoGenerate = true)
+    val dbId: Int = 0,
 
     @SerializedName("nameRu") val nameRu: String?,
     @SerializedName("nameEn") val nameEn: String?,
