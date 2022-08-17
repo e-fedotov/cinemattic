@@ -20,6 +20,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.transition.ChangeBounds
 import androidx.transition.TransitionInflater
@@ -30,16 +31,30 @@ import androidx.work.workDataOf
 import com.bumptech.glide.Glide
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputEditText
+import ru.evgenyfedotov.cinemattic.di.DaggerDetailsFragmentComponent
+import ru.evgenyfedotov.cinemattic.di.DaggerFavoritesFragmentComponent
+import ru.evgenyfedotov.cinemattic.viewmodel.DetailsViewModel
+import ru.evgenyfedotov.cinemattic.viewmodel.DetailsViewModelFactory
 import ru.evgenyfedotov.cinemattic.workers.ReminderWorker
 import java.util.*
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 class DetailsFragment : Fragment() {
+
+    @Inject
+    lateinit var detailsViewModelFactory: DetailsViewModelFactory
+    private val viewModel: DetailsViewModel by viewModels { detailsViewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sharedElementEnterTransition =
             TransitionInflater.from(requireContext()).inflateTransition(R.transition.shared_image)
+
+        DaggerDetailsFragmentComponent.builder()
+            .applicationComponent(App.getAppInstance())
+            .build()
+            .inject(this)
     }
 
     override fun onCreateView(
@@ -66,24 +81,38 @@ class DetailsFragment : Fragment() {
         val toolbar: Toolbar = view.findViewById(R.id.toolbar)
 
 
+        val movieId = arguments?.getString(MainActivity.MOVIE_ID)?.toInt()
+        movieId?.let { id ->
+            viewModel.getMovieById(id)
+        }
+
         postponeEnterTransition()
-        arguments?.let { args ->
+
+        viewModel.movieItem.observe(viewLifecycleOwner) { movie ->
             Glide.with(view)
-                .load(args.getString(MainActivity.POSTER_KEY))
+                .load(movie?.posterUrl)
                 .into(poster)
 
-            poster.transitionName = args.getString(MainActivity.MOVIE_ID)
+            poster.transitionName = movieId.toString()
+            title.text = movie?.nameEn ?: movie?.nameRu
+            year.text = movie?.year
+            description.text = movie?.description
 
-            toolbar.title = args.getString(MainActivity.TITLE_KEY)
+            toolbar.title = movie?.nameEn ?: movie?.nameRu
             toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
             toolbar.navigationIcon?.colorFilter =
                 PorterDuffColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_ATOP)
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
-
-            title.text = args.getString(MainActivity.TITLE_KEY)
-            year.text = args.getString(MainActivity.YEAR_KEY)
-            description.text = args.getString(MainActivity.DESCRIPTION_KEY)
         }
+
+//        arguments?.let { args ->
+//
+//            toolbar.title = args.getString(MainActivity.TITLE_KEY)
+//
+//            title.text = args.getString(MainActivity.TITLE_KEY)
+//            year.text = args.getString(MainActivity.YEAR_KEY)
+//            description.text = args.getString(MainActivity.DESCRIPTION_KEY)
+//        }
 
         val data = Intent()
 
@@ -98,11 +127,13 @@ class DetailsFragment : Fragment() {
         datePickerDialog.addOnPositiveButtonClickListener { date ->
 
             val reminderWorkRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
-//                .setInitialDelay(date, TimeUnit.MILLISECONDS)
-                .setInputData(workDataOf(
-                    MainActivity.TITLE_KEY to title.text.toString(),
-                    MainActivity.DESCRIPTION_KEY to description.text.toString()
-                ))
+                .setInitialDelay(date, TimeUnit.MILLISECONDS)
+                .setInputData(
+                    workDataOf(
+                        MainActivity.TITLE_KEY to title.text.toString(),
+                        MainActivity.DESCRIPTION_KEY to description.text.toString()
+                    )
+                )
                 .build()
 
             WorkManager

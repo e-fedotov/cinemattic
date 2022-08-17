@@ -11,8 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.messaging.FirebaseMessaging
 import ru.evgenyfedotov.cinemattic.workers.ReminderWorker.Companion.CHANNEL_ID
 
 
@@ -23,6 +25,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        FirebaseMessaging.getInstance().token.addOnCompleteListener (OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("firebase", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+
+            // Log and toast
+            Log.d("firebase", token)
+        })
 
 
         setContentView(R.layout.activity_main)
@@ -57,7 +71,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         val bundle = intent!!.extras
-        Log.d("work", "${bundle?.getString(TITLE_KEY)}")
+        Log.d("work", "${bundle?.getString(MOVIE_ID)}")
         if (bundle != null) {
             if (bundle.containsKey("detailsFragment")) {
                 findNavController(R.id.nav_host_fragment)
