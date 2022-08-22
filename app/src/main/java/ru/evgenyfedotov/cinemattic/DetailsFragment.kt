@@ -1,6 +1,9 @@
 package ru.evgenyfedotov.cinemattic
 
+import android.app.AlarmManager
 import android.app.DatePickerDialog
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.ColorFilter
@@ -27,14 +30,19 @@ import androidx.transition.TransitionInflater
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
+import androidx.work.impl.background.systemalarm.SystemAlarmService
 import androidx.work.workDataOf
 import com.bumptech.glide.Glide
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.TimeFormat.CLOCK_24H
 import ru.evgenyfedotov.cinemattic.di.DaggerDetailsFragmentComponent
 import ru.evgenyfedotov.cinemattic.di.DaggerFavoritesFragmentComponent
+import ru.evgenyfedotov.cinemattic.model.MovieItem
 import ru.evgenyfedotov.cinemattic.viewmodel.DetailsViewModel
 import ru.evgenyfedotov.cinemattic.viewmodel.DetailsViewModelFactory
+import ru.evgenyfedotov.cinemattic.workers.AlarmNotificationReceiver
 import ru.evgenyfedotov.cinemattic.workers.ReminderWorker
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -86,6 +94,9 @@ class DetailsFragment : Fragment() {
             viewModel.getMovieById(id)
         }
 
+        var movieTitle: String? = ""
+        var movieDescription: String? = ""
+
         postponeEnterTransition()
 
         viewModel.movieItem.observe(viewLifecycleOwner) { movie ->
@@ -97,6 +108,9 @@ class DetailsFragment : Fragment() {
             title.text = movie?.nameEn ?: movie?.nameRu
             year.text = movie?.year
             description.text = movie?.description
+
+            movieTitle = movie?.nameEn ?: movie?.nameRu
+            movieDescription = movie.description
 
             toolbar.title = movie?.nameEn ?: movie?.nameRu
             toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
@@ -116,34 +130,57 @@ class DetailsFragment : Fragment() {
 
         val data = Intent()
 
+        val reminderDate = Calendar.getInstance()
+
+        // Time picker
+        val timePicker = MaterialTimePicker.Builder()
+            .setTitleText("Set time for reminder")
+            .setHour(Calendar.getInstance().get(Calendar.HOUR_OF_DAY))
+            .setTimeFormat(CLOCK_24H)
+            .build()
+
         // Date dialog builder
         val datePickerDialog =
             MaterialDatePicker.Builder.datePicker()
                 .setTitleText("Remind me later")
                 .build()
 
-
-
         datePickerDialog.addOnPositiveButtonClickListener { date ->
 
+            val computedDelay = date - MaterialDatePicker.todayInUtcMilliseconds()
             val reminderWorkRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
-                .setInitialDelay(date, TimeUnit.MILLISECONDS)
+                .setInitialDelay(computedDelay, TimeUnit.MILLISECONDS)
                 .setInputData(
                     workDataOf(
-                        MainActivity.TITLE_KEY to title.text.toString(),
-                        MainActivity.DESCRIPTION_KEY to description.text.toString()
+                        MainActivity.TITLE_KEY       to title.text.toString(),
+                        MainActivity.DESCRIPTION_KEY to description.text.toString(),
+                        MainActivity.MOVIE_ID        to movieId.toString()
                     )
                 )
                 .build()
 
-            WorkManager
-                .getInstance(requireContext())
-                .enqueue(reminderWorkRequest)
-//            Log.d("Date", "onViewCreated: $date, ${MaterialDatePicker.todayInUtcMilliseconds()}")
-//            Log.d("Date", DateUtils.formatDateTime(context, date, DateUtils.FORMAT_SHOW_DATE).toString())
+//            WorkManager
+//                .getInstance(requireContext())
+//                .enqueue(reminderWorkRequest)
+
+            timePicker.show(parentFragmentManager, "Time")
+            timePicker.addOnPositiveButtonClickListener {
+                reminderDate.timeInMillis = date
+                reminderDate.set(Calendar.HOUR, timePicker.hour)
+                reminderDate.set(Calendar.MINUTE, timePicker.minute)
+
+                scheduleAlarm(requireContext(), reminderDate, movieTitle, movieDescription, movieId.toString())
+
+                Log.d("calendar", "${reminderDate.toString()} ")
+            }
         }
 
-        // Button listeners
+
+        /*
+         *   Button listeners
+         */
+
+        // Share Button
         btnShare.setOnClickListener {
             val shareIntent = Intent(Intent.ACTION_SEND)
             shareIntent.putExtra(Intent.EXTRA_TEXT, commentaryField.text.toString())
@@ -154,15 +191,31 @@ class DetailsFragment : Fragment() {
             startActivity(shareIntentChooser)
         }
 
+        // Back Button
         btnBack.setOnClickListener {
             findNavController().popBackStack()
         }
 
+        // Schedule a reminder Button
         btnSchedule.setOnClickListener {
             datePickerDialog.show(parentFragmentManager, "Date")
         }
 
         startPostponedEnterTransition()
+
+    }
+
+    private fun scheduleAlarm(context: Context, date: Calendar, movieTitle: String?, movieDescription: String?, movieId: String) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+        val alarmIntent = Intent(context, AlarmNotificationReceiver::class.java)
+
+        alarmIntent.putExtra(MainActivity.MOVIE_ID, movieId)
+        alarmIntent.putExtra(MainActivity.TITLE_KEY, movieTitle)
+        alarmIntent.putExtra(MainActivity.DESCRIPTION_KEY, movieDescription)
+
+        val alarmPendingIntent: PendingIntent = PendingIntent.getBroadcast(context, movieId.toInt(), alarmIntent, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT )
+
+        alarmManager?.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, date.timeInMillis, alarmPendingIntent)
 
     }
 

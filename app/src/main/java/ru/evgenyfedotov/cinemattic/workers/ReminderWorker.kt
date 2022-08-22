@@ -20,16 +20,18 @@ class ReminderWorker(private val context: Context, private val workerParams: Wor
 
         val title = inputData.getString(MainActivity.TITLE_KEY)
         val description = inputData.getString(MainActivity.DESCRIPTION_KEY)
+        val movieId = inputData.getString(MainActivity.MOVIE_ID)
 
         val intent: Intent = Intent(context, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         intent.putExtra("detailsFragment", "DetailsFragment")
-        intent.putExtra(MainActivity.TITLE_KEY, title)
-        intent.putExtra(MainActivity.DESCRIPTION_KEY, description)
+//        intent.putExtra(MainActivity.TITLE_KEY, title)
+//        intent.putExtra(MainActivity.DESCRIPTION_KEY, description)
+        intent.putExtra(MainActivity.MOVIE_ID, movieId)
 
         Log.d("work", "$title, $description")
 
-        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent: PendingIntent = PendingIntent.getActivity(context, movieId!!.toInt(), intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_home_black_24dp)
@@ -41,7 +43,7 @@ class ReminderWorker(private val context: Context, private val workerParams: Wor
             .setAutoCancel(true)
 
         with(NotificationManagerCompat.from(context)) {
-            notify(NOTIFICATION_ID, notification.build())
+            notify(movieId!!.toInt(), notification.build())
         }
 
 
