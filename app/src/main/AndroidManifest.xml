@@ -8,11 +8,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:name=".App"
         android:theme="@style/Theme.Cinemattic">
-        <activity
-            android:name=".FavoritesActivity"
-            android:exported="false"
-            android:label="@string/title_activity_favorites" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -22,9 +20,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".DetailsActivity"
-            android:exported="false" />
+
     </application>
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

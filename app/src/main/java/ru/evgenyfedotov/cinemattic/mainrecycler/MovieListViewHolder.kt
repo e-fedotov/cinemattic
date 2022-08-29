@@ -1,18 +1,20 @@
 package ru.evgenyfedotov.cinemattic.mainrecycler
 
-import android.content.Intent
+import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.content.res.AppCompatResources
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.recyclerview.widget.RecyclerView
-import ru.evgenyfedotov.cinemattic.DetailsActivity
-import ru.evgenyfedotov.cinemattic.FavoritesActivity
+import com.bumptech.glide.Glide
+import ru.evgenyfedotov.cinemattic.FavoritesFragment
 import ru.evgenyfedotov.cinemattic.ui.FavoriteButton
 import ru.evgenyfedotov.cinemattic.MainActivity
+import ru.evgenyfedotov.cinemattic.MainListFragment
 import ru.evgenyfedotov.cinemattic.R
-import ru.evgenyfedotov.cinemattic.data.MovieItem
+import ru.evgenyfedotov.cinemattic.model.MovieItem
 
 class MovieListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -23,28 +25,39 @@ class MovieListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val favBtn: FavoriteButton = itemView.findViewById(R.id.favBtn)
 
     fun bind(movie: MovieItem, listener: MovieItemListener) {
-        title.text = itemView.context.getString(movie.titleId)
-        year.text = itemView.context.getString(movie.yearId)
-        poster.setImageDrawable(AppCompatResources.getDrawable(itemView.context, movie.posterId))
+        title.text = movie.nameEn ?: movie.nameRu
+        year.text = movie.year
+        Glide.with(itemView)
+            .load(movie.posterUrlPreview)
+            .into(poster)
 
-        if (FavoritesActivity.favorites.find { item -> movie.equals(item) } == movie) {
-            favBtn.isChecked = true
-        } else {
-            favBtn.isChecked = false
-        }
+        favBtn.isChecked = MainListFragment.favoritesList.find { item -> item.filmId == movie.filmId }?.filmId == movie.filmId
+
         favBtn.setOnClickListener {
-            listener.onFavoriteClick(movie, favBtn.isChecked, adapterPosition)
+            listener.onFavoriteClick(movie, favBtn.isChecked, bindingAdapterPosition)
         }
 
-        btn.setOnClickListener {
-            val intent = Intent(itemView.context, DetailsActivity::class.java)
-            intent
-                .putExtra(MainActivity.POSTER_KEY, movie.posterId)
-                .putExtra(MainActivity.TITLE_KEY, movie.titleId)
-                .putExtra(MainActivity.DESCRIPTION_KEY, movie.descriptionId)
-                .putExtra(MainActivity.YEAR_KEY, movie.yearId)
+        btn.setOnClickListener { view ->
 
-            itemView.context.startActivity(intent)
+            val args = Bundle()
+            val movieName = movie.nameEn ?: movie.nameRu
+
+            args.putString(MainActivity.MOVIE_ID, movie.filmId.toString())
+            args.putString(MainActivity.POSTER_KEY, movie.posterUrl)
+            args.putString(MainActivity.TITLE_KEY, movieName)
+            args.putString(MainActivity.DESCRIPTION_KEY, movie.description)
+            args.putString(MainActivity.YEAR_KEY, movie.year)
+
+            poster.apply {
+                transitionName = movie.filmId.toString()
+            }
+
+            val extras = FragmentNavigatorExtras(
+                poster to movie.filmId.toString()
+            )
+
+            view.findNavController()
+                .navigate(R.id.detailsFragment, args, null, extras)
         }
 
 

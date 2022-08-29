@@ -20,8 +20,8 @@
             <ImageView
                 android:id="@+id/poster"
                 android:layout_width="100dp"
+                android:transitionName="detailsPoster"
                 android:layout_height="match_parent"
-                android:adjustViewBounds="true"
                 android:contentDescription="@string/movie_poster_content_description"
                 android:scaleType="centerCrop"
                 app:layout_constraintBottom_toBottomOf="parent"
