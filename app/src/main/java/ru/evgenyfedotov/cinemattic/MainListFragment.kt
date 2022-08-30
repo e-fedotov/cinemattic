@@ -128,6 +128,8 @@ class MainListFragment : Fragment() {
             override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
                 if (isFavorite) {
 
+                    // Отсюда надо убрать бизнес логику во вьмодель с помощью стейт флоу
+                    // оттуда сделать колбек сюда и здесь уже решать что произошло
                     viewModel.addtoFavorites(item)
 
                     Snackbar.make(

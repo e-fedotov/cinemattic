@@ -147,17 +147,17 @@ class DetailsFragment : Fragment() {
 
         datePickerDialog.addOnPositiveButtonClickListener { date ->
 
-            val computedDelay = date - MaterialDatePicker.todayInUtcMilliseconds()
-            val reminderWorkRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
-                .setInitialDelay(computedDelay, TimeUnit.MILLISECONDS)
-                .setInputData(
-                    workDataOf(
-                        MainActivity.TITLE_KEY       to title.text.toString(),
-                        MainActivity.DESCRIPTION_KEY to description.text.toString(),
-                        MainActivity.MOVIE_ID        to movieId.toString()
-                    )
-                )
-                .build()
+//            val computedDelay = date - MaterialDatePicker.todayInUtcMilliseconds()
+//            val reminderWorkRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
+//                .setInitialDelay(computedDelay, TimeUnit.MILLISECONDS)
+//                .setInputData(
+//                    workDataOf(
+//                        MainActivity.TITLE_KEY       to title.text.toString(),
+//                        MainActivity.DESCRIPTION_KEY to description.text.toString(),
+//                        MainActivity.MOVIE_ID        to movieId.toString()
+//                    )
+//                )
+//                .build()
 
 //            WorkManager
 //                .getInstance(requireContext())
@@ -205,6 +205,7 @@ class DetailsFragment : Fragment() {
 
     }
 
+    // Унести во вьюмодель
     private fun scheduleAlarm(context: Context, date: Calendar, movieTitle: String?, movieDescription: String?, movieId: String) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
         val alarmIntent = Intent(context, AlarmNotificationReceiver::class.java)

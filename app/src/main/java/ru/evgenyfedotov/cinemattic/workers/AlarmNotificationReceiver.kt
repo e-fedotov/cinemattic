@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.icu.util.Calendar
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import ru.evgenyfedotov.cinemattic.MainActivity
@@ -50,7 +51,7 @@ class AlarmNotificationReceiver : BroadcastReceiver() {
     }
 
     companion object {
-        const val CHANNEL_ID = "Reminder Notifications"
+        const val CHANNEL_ID      = "Reminder Notifications"
         const val NOTIFICATION_ID = 1
     }
 }
