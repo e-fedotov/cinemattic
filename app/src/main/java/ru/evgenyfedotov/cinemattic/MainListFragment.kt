@@ -124,6 +124,7 @@ class MainListFragment : Fragment() {
     private fun initRecycler(view: View) {
         recyclerView = view.findViewById(R.id.recyclerView)
 
+        // В адаптер надо добавлять лайвдату с избранными фильмами из вьюмодели
         adapter = MovieListPagingAdapter(object : MovieItemListener {
             override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
                 if (isFavorite) {
