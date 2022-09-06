@@ -49,15 +49,11 @@ class FavoritesFragment : Fragment() {
 
         viewModel.favoriteMovies.observe(viewLifecycleOwner) {
             adapter.updateItems(it)
-            MainListFragment.favoritesList.clear()
-            it.forEach {
-                MainListFragment.favoritesList.add(it)
-            }
         }
     }
 
     fun addToFavorites(movieItem: MovieItem) {
-        viewModel.addtoFavorites(movieItem)
+        viewModel.addToFavorites(movieItem)
     }
 
     fun removeFromFavorites(movieItem: MovieItem) {
@@ -67,9 +63,10 @@ class FavoritesFragment : Fragment() {
     private fun initRecycler(view: View) {
         recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
 
-        adapter = MovieListAdapter(favoriteMovies, object : MovieItemListener {
+        adapter = MovieListAdapter(items = favoriteMovies, favoriteMoviesList = viewModel.favoriteMovies, lifecycleOwner = viewLifecycleOwner, listener = object : MovieItemListener {
             override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
                 removeFromFavorites(item)
+//                adapter.notifyDataSetChanged()
 //                adapter.notifyItemRemoved(position)
             }
         })

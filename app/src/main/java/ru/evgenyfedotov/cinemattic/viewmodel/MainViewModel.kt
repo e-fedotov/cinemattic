@@ -1,13 +1,12 @@
 package ru.evgenyfedotov.cinemattic.viewmodel
 
+import android.graphics.Movie
 import android.util.Log
 import androidx.lifecycle.*
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.evgenyfedotov.cinemattic.data.MovieRepository
 import ru.evgenyfedotov.cinemattic.model.MovieItem
@@ -19,75 +18,60 @@ import javax.inject.Inject
 
 class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() {
 
-    private val mMovieSearchResponse =
-        MutableLiveData<ru.evgenyfedotov.cinemattic.model.Result<List<MovieItem>>>()
-    val movieSearchResponse: LiveData<Result<List<MovieItem>>>
-        get() = mMovieSearchResponse
-
-    private val mPagingData = MutableLiveData<PagingData<MovieItem>>()
-    val pagingData: LiveData<PagingData<MovieItem>>
-        get() = mPagingData
-
-    private var mutableMoviesList = mutableListOf<MovieItem>()
-
-    private val mFavoriteMovies = MutableLiveData<List<MovieItem>>()
+    private var mFavoriteMovies = MutableLiveData<List<MovieItem>>()
     val favoriteMovies: LiveData<List<MovieItem>>
         get() = mFavoriteMovies
 
-    var favoriteMoviesList = mutableListOf<MovieItem>()
+    private val mToastStateFlow = MutableStateFlow(ToastStates.NO_TOAST)
+    val toastStateFlow = mToastStateFlow.asStateFlow()
+    var currentActionableMovieItem: MovieItem? = null
+    var currentPosition = 0
 
     init {
         getFavoriteMoviesList()
-        mutableMoviesList.clear()
-        fetchTopMovies(1)
     }
 
     fun getPagingMovies(): Flow<PagingData<MovieItem>> {
-//        viewModelScope.launch {
-//            movieRepository.getPagingMovies().collect() {
-//                mPagingData.value = it
-//            }
-//        }
-//        return movieRepository.getPagingMovies()
         return movieRepository.getPagingMoviesCached().cachedIn(viewModelScope)
     }
 
     fun getFavoriteMoviesList() {
         viewModelScope.launch {
-            movieRepository.getFavoriteMovies().collect() { list ->
+            movieRepository.getFavoriteMovies().collect { list ->
                 mFavoriteMovies.value = list
             }
         }
     }
 
-
-    fun fetchTopMovies(page: Int) {
-        viewModelScope.launch {
-            movieRepository.getTopMovies(page).collect() {
-                if (it != null) {
-                    it.data?.forEach {
-                        mutableMoviesList.add(it)
-                    }
-                    mMovieSearchResponse.value =
-                        Result(it.status, mutableMoviesList, it.error, it.message)
-                }
-
-            }
-        }
-    }
-
-    fun removeFromFavorites(movie: MovieItem) {
+     fun removeFromFavorites(movie: MovieItem) {
         viewModelScope.launch {
             movieRepository.deleteFavoriteMovie(movie)
+            mToastStateFlow.emit(ToastStates.REMOVE_FAVORITES)
+            mToastStateFlow.emit(ToastStates.NO_TOAST)
             getFavoriteMoviesList()
         }
     }
 
-    fun addtoFavorites(movie: MovieItem) {
+    fun addToFavorites(movie: MovieItem) {
         viewModelScope.launch {
             movieRepository.addFavoriteMovie(movie)
+            mToastStateFlow.emit(ToastStates.ADD_FAVORITES)
+            mToastStateFlow.emit(ToastStates.NO_TOAST)
             getFavoriteMoviesList()
         }
     }
 
+    fun onFavoriteClickManager(movie: MovieItem, isFavorite: Boolean, position: Int) {
+        currentActionableMovieItem = movie
+        currentPosition = position
+        if (isFavorite) {
+            removeFromFavorites(movie)
+        } else {
+            addToFavorites(movie)
+        }
+    }
+
+    enum class ToastStates {
+        ADD_FAVORITES, REMOVE_FAVORITES, NO_TOAST
+    }
 }

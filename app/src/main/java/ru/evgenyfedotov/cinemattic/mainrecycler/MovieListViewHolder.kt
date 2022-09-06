@@ -24,17 +24,17 @@ class MovieListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val btn: Button = itemView.findViewById(R.id.detailsBtn)
     private val favBtn: FavoriteButton = itemView.findViewById(R.id.favBtn)
 
-    fun bind(movie: MovieItem, listener: MovieItemListener) {
+    fun bind(movie: MovieItem, isFavorite: Boolean, listener: MovieItemListener) {
         title.text = movie.nameEn ?: movie.nameRu
         year.text = movie.year
         Glide.with(itemView)
             .load(movie.posterUrlPreview)
             .into(poster)
 
-        favBtn.isChecked = MainListFragment.favoritesList.find { item -> item.filmId == movie.filmId }?.filmId == movie.filmId
-
+//        favBtn.isChecked = isFavorite
+        favBtn.isChecked = movie.isFavorite
         favBtn.setOnClickListener {
-            listener.onFavoriteClick(movie, favBtn.isChecked, bindingAdapterPosition)
+            listener.onFavoriteClick(movie, !favBtn.isChecked, bindingAdapterPosition)
         }
 
         btn.setOnClickListener { view ->

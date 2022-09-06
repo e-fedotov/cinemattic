@@ -33,6 +33,6 @@ data class MovieItem(
     @SerializedName("posterUrl") val posterUrl: String,
     @SerializedName("posterUrlPreview") val posterUrlPreview: String,
 
-    var page: Int?
-//    var isFavorite: Boolean = false
+    var page: Int?,
+    var isFavorite: Boolean = false
 )

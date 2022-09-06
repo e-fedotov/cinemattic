@@ -25,8 +25,11 @@ interface MovieCacheDao {
     @Update
     fun updateAll(movies: List<MovieItem>)
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     fun updateMovie(movie: MovieItem)
+
+    @Query("UPDATE movies_cache SET isFavorite = :isFavorite WHERE filmId = :filmId")
+    fun updateMovieById(isFavorite: Boolean, filmId: Int)
 
     @Delete
     fun deleteAll(movies: List<MovieItem>)

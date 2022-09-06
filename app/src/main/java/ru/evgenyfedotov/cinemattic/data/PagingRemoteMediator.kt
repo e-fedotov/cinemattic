@@ -1,11 +1,13 @@
 package ru.evgenyfedotov.cinemattic.data
 
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
+import android.util.Log
+import androidx.paging.*
 import androidx.room.withTransaction
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import org.json.JSONObject
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import ru.evgenyfedotov.cinemattic.data.local.AppDatabase
 import ru.evgenyfedotov.cinemattic.model.MovieItem
 import ru.evgenyfedotov.cinemattic.model.PagingKeys
@@ -46,26 +48,41 @@ class PagingRemoteMediator @Inject constructor(
 
             val api = retrofit.create(MovieDatabaseAPI::class.java)
             val response = api.getTopMovies("TOP_250_BEST_FILMS", loadKey ?: 1)
-            val resBody = response.body()
-            val movies = resBody?.films
-            val isEndOfList = movies?.isEmpty()
-            appDatabase.withTransaction {
-                if (loadType == LoadType.REFRESH) {
-                    appDatabase.movieCacheDao().clearAllMovies()
-                    appDatabase.pagingKeysDao().clearAllPagingKeys()
-                }
-                val prevKey = if (loadKey == DEFAULT_PAGE) null else loadKey - 1
-                val nextKey = if (isEndOfList == true) null else loadKey + 1
-                movies?.forEach {
-                    it.page = loadKey
-                    appDatabase.pagingKeysDao().insertKey(PagingKeys(it.filmId, prevKey, nextKey))
-                }
-                movies?.let {
-                    appDatabase.movieCacheDao().insertAll(it)
-                }
-            }
 
-            MediatorResult.Success(endOfPaginationReached = isEndOfList == true)
+
+
+            if (response.code() == 402) {
+                val jsonObject = JSONObject(response.errorBody()?.charStream()!!.readText())
+                val error = jsonObject.get("message")
+                Log.d("HALLO", "load: $error")
+                MediatorResult.Error(Throwable(error.toString()))
+            } else {
+                val resBody = response.body()
+                val movies = resBody?.films
+                val isEndOfList = movies?.isEmpty()
+                appDatabase.withTransaction {
+                    if (loadType == LoadType.REFRESH && response.code() != 402) {
+                        appDatabase.movieCacheDao().clearAllMovies()
+                        appDatabase.pagingKeysDao().clearAllPagingKeys()
+                    }
+                    val prevKey = if (loadKey == DEFAULT_PAGE) null else loadKey - 1
+                    val nextKey = if (isEndOfList == true) null else loadKey + 1
+                    val favorites = appDatabase.favoriteMoviesDao().getAllFavorites()
+                    movies?.forEach {
+                        it.page = loadKey
+                        appDatabase.pagingKeysDao()
+                            .insertKey(PagingKeys(it.filmId, prevKey, nextKey))
+
+                        it.isFavorite = favorites?.find { fav -> fav.filmId == it.filmId }?.filmId == it.filmId
+                        appDatabase.movieCacheDao().insertMovie(it)
+                    }
+//                    movies?.let {
+//                        appDatabase.movieCacheDao().insertAll(it)
+//                    }
+                }
+
+                MediatorResult.Success(endOfPaginationReached = isEndOfList == true)
+            }
 
         } catch (e: Exception) {
             MediatorResult.Error(e)
