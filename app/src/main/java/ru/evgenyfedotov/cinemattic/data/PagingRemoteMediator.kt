@@ -57,7 +57,7 @@ class PagingRemoteMediator @Inject constructor(
             }
 
             val api = retrofit.create(MovieDatabaseAPI::class.java)
-            val response = api.getTopMovies("TOP_250_BEST_FILMS", loadKey ?: 1)
+            val response = api.getTopMovies("TOP_250_BEST_FILMS", loadKey)
 
             if (response.code() == 402) {
                 val jsonObject = JSONObject(response.errorBody()?.charStream()!!.readText())
@@ -94,36 +94,9 @@ class PagingRemoteMediator @Inject constructor(
         }
     }
 
-    suspend fun getKeyPageData(loadType: LoadType, state: PagingState<Int, MovieItem>): Any? {
-        return when (loadType) {
-            LoadType.REFRESH -> {
-                val remoteKeys = getClosestRemoteKey(state)
-                remoteKeys?.nextKey?.minus(1) ?: DEFAULT_PAGE
-            }
-            LoadType.APPEND -> {
-                val remoteKeys = getLastRemoteKey(state)
-//                    ?: throw InvalidObjectException("Remote key should not be null for $loadType")
-                val nextKey = remoteKeys?.nextKey
-                if (nextKey == null) {
-                    return MediatorResult.Success(endOfPaginationReached = remoteKeys != null)
-                }
-                nextKey
-            }
-            LoadType.PREPEND -> {
-                val remoteKeys = getFirstRemoteKey(state)
-//                    ?: throw InvalidObjectException("Invalid state, key should not be null")
-                val prevKey = remoteKeys?.prevKey
-                if (prevKey == null) {
-                    return MediatorResult.Success(endOfPaginationReached = remoteKeys != null)
-                }
-                prevKey
-            }
-        }
-    }
-
     private suspend fun getFirstRemoteKey(state: PagingState<Int, MovieItem>): PagingKeys? {
         return state.pages
-            .firstOrNull() { it.data.isNotEmpty() }
+            .firstOrNull { it.data.isNotEmpty() }
             ?.data?.firstOrNull()
             ?.let { movie -> appDatabase.pagingKeysDao().getPagingKeyId(movie.filmId) }
     }

@@ -25,8 +25,8 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat.CLOCK_24H
 import ru.evgenyfedotov.cinemattic.di.DaggerDetailsFragmentComponent
-import ru.evgenyfedotov.cinemattic.viewmodel.DetailsViewModel
-import ru.evgenyfedotov.cinemattic.viewmodel.DetailsViewModelFactory
+import ru.evgenyfedotov.cinemattic.viewmodel.MainViewModel
+import ru.evgenyfedotov.cinemattic.viewmodel.MainViewModelFactory
 import ru.evgenyfedotov.cinemattic.workers.AlarmNotificationReceiver
 import java.util.*
 import javax.inject.Inject
@@ -34,8 +34,8 @@ import javax.inject.Inject
 class DetailsFragment : Fragment() {
 
     @Inject
-    lateinit var detailsViewModelFactory: DetailsViewModelFactory
-    private val viewModel: DetailsViewModel by viewModels { detailsViewModelFactory }
+    lateinit var viewModelFactory: MainViewModelFactory
+    private val viewModel: MainViewModel by viewModels { viewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +82,7 @@ class DetailsFragment : Fragment() {
         postponeEnterTransition()
 
         viewModel.movieItem.observe(viewLifecycleOwner) { movie ->
-            if(movie == null) { // Hide all buttons if we didn't get movie info
+            if (movie == null) { // Hide all buttons if we didn't get movie info
                 commentaryField.isVisible = false
                 btnShare.isVisible        = false
                 btnSchedule.isVisible     = false
@@ -92,10 +92,13 @@ class DetailsFragment : Fragment() {
                 .load(movie?.posterUrl)
                 .into(poster)
 
+            checkbox.isChecked = viewModel.isMovieFavorite(movie)
+
             poster.transitionName = movieId.toString()
             title.text = movie?.nameEn ?: movie?.nameRu
             year.text = movie?.year
-            description.text = movie?.description ?: "Could not load movie details. Please check your Internet connection"
+            description.text = movie?.description
+                ?: getString(R.string.movieDescriptionError)
 
             movieTitle = movie?.nameEn ?: movie?.nameRu
             movieDescription = movie?.description
@@ -106,24 +109,21 @@ class DetailsFragment : Fragment() {
             toolbar.navigationIcon?.colorFilter =
                 PorterDuffColorFilter(Color.parseColor("#FFFFFF"), PorterDuff.Mode.SRC_ATOP)
             toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+
+            // Favorites Button
+            checkbox.setOnCheckedChangeListener { btn, state ->
+                when(state) {
+                    true  -> viewModel.addToFavorites(movie)
+                    false -> viewModel.removeFromFavorites(movie)
+                }
+            }
         }
-
-//        arguments?.let { args ->
-//
-//            toolbar.title = args.getString(MainActivity.TITLE_KEY)
-//
-//            title.text = args.getString(MainActivity.TITLE_KEY)
-//            year.text = args.getString(MainActivity.YEAR_KEY)
-//            description.text = args.getString(MainActivity.DESCRIPTION_KEY)
-//        }
-
-        val data = Intent()
 
         val reminderDate = Calendar.getInstance()
 
         // Time picker
         val timePicker = MaterialTimePicker.Builder()
-            .setTitleText("Set time for reminder")
+            .setTitleText(getString(R.string.timePickerTitle))
             .setHour(Calendar.getInstance().get(Calendar.HOUR_OF_DAY))
             .setTimeFormat(CLOCK_24H)
             .build()
@@ -131,26 +131,10 @@ class DetailsFragment : Fragment() {
         // Date dialog builder
         val datePickerDialog =
             MaterialDatePicker.Builder.datePicker()
-                .setTitleText("Remind me later")
+                .setTitleText(getString(R.string.dateDialogTitle))
                 .build()
 
         datePickerDialog.addOnPositiveButtonClickListener { date ->
-
-//            val computedDelay = date - MaterialDatePicker.todayInUtcMilliseconds()
-//            val reminderWorkRequest = OneTimeWorkRequestBuilder<ReminderWorker>()
-//                .setInitialDelay(computedDelay, TimeUnit.MILLISECONDS)
-//                .setInputData(
-//                    workDataOf(
-//                        MainActivity.TITLE_KEY       to title.text.toString(),
-//                        MainActivity.DESCRIPTION_KEY to description.text.toString(),
-//                        MainActivity.MOVIE_ID        to movieId.toString()
-//                    )
-//                )
-//                .build()
-
-//            WorkManager
-//                .getInstance(requireContext())
-//                .enqueue(reminderWorkRequest)
 
             timePicker.show(parentFragmentManager, "Time")
             timePicker.addOnPositiveButtonClickListener {
@@ -158,16 +142,22 @@ class DetailsFragment : Fragment() {
                 reminderDate.set(Calendar.HOUR, timePicker.hour)
                 reminderDate.set(Calendar.MINUTE, timePicker.minute)
 
-                scheduleAlarm(requireContext(), reminderDate, movieTitle, movieDescription, movieId.toString())
+                viewModel.scheduleAlarm(
+                    requireContext(),
+                    reminderDate,
+                    movieTitle,
+                    movieDescription,
+                    movieId.toString()
+                )
 
                 Log.d("calendar", "${reminderDate.toString()} ")
             }
         }
 
 
-        /*
-         *   Button listeners
-         */
+        //
+        // Button listeners
+        //
 
         // Share Button
         btnShare.setOnClickListener {
@@ -191,21 +181,6 @@ class DetailsFragment : Fragment() {
         }
 
         startPostponedEnterTransition()
-
-    }
-
-    // Унести во вьюмодель
-    private fun scheduleAlarm(context: Context, date: Calendar, movieTitle: String?, movieDescription: String?, movieId: String) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-        val alarmIntent = Intent(context, AlarmNotificationReceiver::class.java)
-
-        alarmIntent.putExtra(MainActivity.MOVIE_ID, movieId)
-        alarmIntent.putExtra(MainActivity.TITLE_KEY, movieTitle)
-        alarmIntent.putExtra(MainActivity.DESCRIPTION_KEY, movieDescription)
-
-        val alarmPendingIntent: PendingIntent = PendingIntent.getBroadcast(context, movieId.toInt(), alarmIntent, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT )
-
-        alarmManager?.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, date.timeInMillis, alarmPendingIntent)
 
     }
 

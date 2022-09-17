@@ -23,5 +23,12 @@
     <string name="snackbar_favorites_removed">Movie removed from favorites</string>
     <string name="snackbar_favorites_added">Movie added to Favorites</string>
     <string name="undo">Undo</string>
+    <string name="default_network_error_msg">Could not get items</string>
+    <string name="retry">Retry</string>
+    <string name="notificationChannelName">Watch later reminder</string>
+    <string name="notificationChannelDescription">Receive notifications to watch movies later</string>
+    <string name="timePickerTitle">Set time for reminder</string>
+    <string name="dateDialogTitle">Set date for reminder</string>
+    <string name="movieDescriptionError">Could not load movie details. Please check your Internet connection</string>
 
 </resources>

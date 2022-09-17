@@ -20,8 +20,6 @@ import ru.evgenyfedotov.cinemattic.workers.AlarmNotificationReceiver.Companion.C
 
 class MainActivity : AppCompatActivity() {
 
-    private val recyclerView by lazy { findViewById<RecyclerView>(R.id.recyclerView) }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -38,10 +36,9 @@ class MainActivity : AppCompatActivity() {
             Log.d("firebase", token)
         })
 
-
         setContentView(R.layout.activity_main)
-        val bottomNavigation: BottomNavigationView = findViewById(R.id.bottomNavigation)
 
+        val bottomNavigation: BottomNavigationView = findViewById(R.id.bottomNavigation)
         val navController = findNavController(R.id.nav_host_fragment)
         bottomNavigation.setupWithNavController(navController)
 
@@ -58,20 +55,14 @@ class MainActivity : AppCompatActivity() {
                 else -> false
             }
         }
+
         onNewIntent(intent)
         createNotificationChannel()
 
     }
 
-    override fun onResume() {
-//        recyclerView.adapter?.notifyDataSetChanged()
-
-        super.onResume()
-    }
-
     override fun onNewIntent(intent: Intent?) {
         val bundle = intent!!.extras
-        Log.d("work", "${bundle?.getString(MOVIE_ID)}")
         if (bundle != null) {
             if (bundle.containsKey("detailsFragment")) {
                 findNavController(R.id.nav_host_fragment)
@@ -79,6 +70,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     override fun onBackPressed() {
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
         navHost?.let { navFragment ->
@@ -107,8 +99,8 @@ class MainActivity : AppCompatActivity() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Watch later reminder"
-            val descriptionText = "Receive notifications to watch movies later"
+            val name = getString(R.string.notificationChannelName)
+            val descriptionText = getString(R.string.notificationChannelDescription)
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = descriptionText

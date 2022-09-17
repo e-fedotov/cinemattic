@@ -1,5 +1,9 @@
 package ru.evgenyfedotov.cinemattic.viewmodel
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.graphics.Movie
 import android.util.Log
 import androidx.lifecycle.*
@@ -8,12 +12,15 @@ import androidx.paging.cachedIn
 import androidx.paging.map
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import ru.evgenyfedotov.cinemattic.MainActivity
 import ru.evgenyfedotov.cinemattic.data.MovieRepository
 import ru.evgenyfedotov.cinemattic.model.MovieItem
 import ru.evgenyfedotov.cinemattic.network.api.MovieDatabaseAPI
 import ru.evgenyfedotov.cinemattic.model.MovieSearchResponse
 import ru.evgenyfedotov.cinemattic.model.MovieTopResponse
 import ru.evgenyfedotov.cinemattic.model.Result
+import ru.evgenyfedotov.cinemattic.workers.AlarmNotificationReceiver
+import java.util.*
 import javax.inject.Inject
 
 class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() {
@@ -24,6 +31,10 @@ class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() 
 
     private val mToastStateFlow = MutableStateFlow(ToastStates.NO_TOAST)
     val toastStateFlow = mToastStateFlow.asStateFlow()
+
+    private val mMovieItem = MutableLiveData<MovieItem>()
+    val movieItem: LiveData<MovieItem>
+        get() = mMovieItem
 
     var currentActionableMovieItem: MovieItem? = null
     var currentPosition = 0
@@ -42,6 +53,20 @@ class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() 
                 mFavoriteMovies.value = list
             }
         }
+    }
+
+    fun getMovieById(id: Int) {
+        viewModelScope.launch {
+            movieRepository.getMovieById(id).collect() {
+                if (it != null) {
+                    mMovieItem.value = it.data?.data
+                }
+            }
+        }
+    }
+
+    fun isMovieFavorite(movie: MovieItem): Boolean {
+        return mFavoriteMovies.value?.find { movieItem -> movieItem.filmId == movie.filmId } != null
     }
 
      fun removeFromFavorites(movie: MovieItem) {
@@ -70,6 +95,34 @@ class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() 
         } else {
             addToFavorites(movie)
         }
+    }
+
+    fun scheduleAlarm(
+        context: Context,
+        date: Calendar,
+        movieTitle: String?,
+        movieDescription: String?,
+        movieId: String
+    ) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+        val alarmIntent = Intent(context, AlarmNotificationReceiver::class.java)
+
+        alarmIntent.putExtra(MainActivity.MOVIE_ID, movieId)
+        alarmIntent.putExtra(MainActivity.TITLE_KEY, movieTitle)
+        alarmIntent.putExtra(MainActivity.DESCRIPTION_KEY, movieDescription)
+
+        val alarmPendingIntent: PendingIntent = PendingIntent.getBroadcast(
+            context,
+            movieId.toInt(),
+            alarmIntent,
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        alarmManager?.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            date.timeInMillis,
+            alarmPendingIntent
+        )
     }
 
     enum class ToastStates {

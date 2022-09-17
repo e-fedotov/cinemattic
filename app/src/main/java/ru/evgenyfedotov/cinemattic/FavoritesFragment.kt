@@ -3,6 +3,7 @@ package ru.evgenyfedotov.cinemattic
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,8 +37,14 @@ class FavoritesFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_favorites, container, false)
 
-        DaggerFavoritesFragmentComponent.builder().applicationComponent(App.getAppInstance()).build().inject(this)
+        DaggerFavoritesFragmentComponent.builder().applicationComponent(App.getAppInstance())
+            .build().inject(this)
 
+        initRecycler(view)
+
+        viewModel.favoriteMovies.observe(viewLifecycleOwner) {
+            adapter.updateItems(it)
+        }
 
         return view
     }
@@ -45,29 +52,14 @@ class FavoritesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.getFavoriteMoviesList()
-        initRecycler(view)
-
-        viewModel.favoriteMovies.observe(viewLifecycleOwner) {
-            adapter.updateItems(it)
-        }
-    }
-
-    fun addToFavorites(movieItem: MovieItem) {
-        viewModel.addToFavorites(movieItem)
-    }
-
-    fun removeFromFavorites(movieItem: MovieItem) {
-        viewModel.removeFromFavorites(movieItem)
     }
 
     private fun initRecycler(view: View) {
-        recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
 
+        recyclerView = view.findViewById(R.id.recyclerView)
         adapter = MovieListAdapter(items = favoriteMovies, listener = object : MovieItemListener {
             override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
-                removeFromFavorites(item)
-//                adapter.notifyDataSetChanged()
-//                adapter.notifyItemRemoved(position)
+                viewModel.removeFromFavorites(item)
             }
         })
 
@@ -85,7 +77,6 @@ class FavoritesFragment : Fragment() {
         (activity as AppCompatActivity).supportActionBar?.title =
             getString(R.string.title_activity_favorites)
     }
-
 
 
 }
