@@ -2,6 +2,8 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
+    id 'com.google.firebase.crashlytics'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -38,10 +40,23 @@ android {
 
 dependencies {
 
+    // Import the BoM for the Firebase platform
+    implementation platform('com.google.firebase:firebase-bom:30.3.1')
+
+    // Declare the dependencies for the Crashlytics and Analytics libraries
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.0.7'
+
     def room_version = "2.4.2"
+    def work_version = "2.7.1"
 
     implementation 'com.google.dagger:dagger:2.42'
     kapt 'com.google.dagger:dagger-compiler:2.42'
+
+    implementation "androidx.work:work-runtime-ktx:$work_version"
+    implementation "androidx.work:work-rxjava2:$work_version"
 
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
     implementation 'androidx.core:core-ktx:1.8.0'

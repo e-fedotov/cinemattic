@@ -15,48 +15,10 @@ private const val BASE_URL = "https://kinopoiskapiunofficial.tech/api/v2.1/films
 
 class App : Application() {
 
-    lateinit var api: MovieDatabaseAPI
-    lateinit var retrofit: Retrofit
-
     override fun onCreate() {
         super.onCreate()
         INSTANCE = DaggerApplicationComponent.factory().create(this)
         DaggerApplicationComponent.factory().create(this).inject(this)
-    }
-
-    private fun initRetrofit(): Retrofit {
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(createHttpClient())
-            .build()
-
-        api = retrofit.create(MovieDatabaseAPI::class.java)
-        return retrofit
-
-    }
-
-    private fun createHttpClient(): OkHttpClient {
-
-        return OkHttpClient.Builder()
-            .addInterceptor { chain ->
-                chain.proceed(chain
-                    .request().run {
-                        newBuilder()
-                            .addHeader("X-API-KEY", API_KEY)
-                            .build()
-                    })
-            }
-            .addInterceptor(
-                HttpLoggingInterceptor()
-                .apply {
-                    if (BuildConfig.DEBUG) {
-                        level = HttpLoggingInterceptor.Level.BODY
-                    }
-                })
-            .build()
-
     }
 
     companion object {

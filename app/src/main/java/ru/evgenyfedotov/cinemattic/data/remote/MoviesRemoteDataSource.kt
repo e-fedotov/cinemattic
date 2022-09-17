@@ -1,5 +1,6 @@
 package ru.evgenyfedotov.cinemattic.data.remote
 
+import android.graphics.Movie
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -19,6 +20,7 @@ class MoviesRemoteDataSource @Inject constructor(
     private val appDatabase: AppDatabase
 ) {
 
+    private val apiService = retrofit.create(MovieDatabaseAPI::class.java)
 
     fun getTopMoviesPagingFlow(pagingConfig: PagingConfig = getDefaultPageConfig()): Flow<PagingData<MovieItem>> {
         return Pager(
@@ -43,15 +45,20 @@ class MoviesRemoteDataSource @Inject constructor(
 
 
     suspend fun fetchTopMovies(page: Int): Result<MovieSearchResponse> {
-        val apiService = retrofit.create(MovieDatabaseAPI::class.java)
         return getResponse(
             request = { apiService.getTopMovies("TOP_250_BEST_FILMS", page) },
             defaultErrorMessage = "Could not get Top movies from server"
         )
     }
 
+    suspend fun fetchMovieById(id: Int): Result<MovieByIdResponse> {
+        return getResponse(
+            request = { apiService.getMovie(id) },
+            defaultErrorMessage = "Could not get Movie"
+        )
+    }
+
     suspend fun searchMovieByKeyword(keyword: String, page: Int): Result<MovieSearchResponse> {
-        val apiService = retrofit.create(MovieDatabaseAPI::class.java)
         return getResponse(
             request = { apiService.searchMovieByKeyword(keyword, page) },
             defaultErrorMessage = "Movie Search Failed"

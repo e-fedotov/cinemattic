@@ -40,7 +40,7 @@ class PagingRemoteMediator @Inject constructor(
                     if (remoteKey?.nextKey == null) {
                         return MediatorResult.Success(endOfPaginationReached = true)
                     }
-                    remoteKey?.nextKey
+                    remoteKey.nextKey
                 }
             }
 

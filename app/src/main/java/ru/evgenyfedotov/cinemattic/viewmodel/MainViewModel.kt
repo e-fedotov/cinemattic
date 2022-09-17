@@ -62,22 +62,10 @@ class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() 
 
 
     fun fetchTopMovies(page: Int) {
-
         viewModelScope.launch {
             movieRepository.getTopMovies(page).collect() {
-//                if (it != null) {
-//                    mMovieSearchResponse.value = ru.evgenyfedotov.cinemattic.model.Result(it.status,
-//                        it.data?.films, it.error, it.message)
-//                }
                 if (it != null) {
                     it.data?.forEach {
-
-//                        mutableMoviesList.removeAll { item ->
-//                            it.filmId == mutableMoviesList.find {
-//                                it.filmId == item.filmId
-//                            }?.filmId
-//                        }
-
                         mutableMoviesList.add(it)
                     }
                     mMovieSearchResponse.value =

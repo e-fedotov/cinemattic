@@ -124,10 +124,13 @@ class MainListFragment : Fragment() {
     private fun initRecycler(view: View) {
         recyclerView = view.findViewById(R.id.recyclerView)
 
+        // В адаптер надо добавлять лайвдату с избранными фильмами из вьюмодели
         adapter = MovieListPagingAdapter(object : MovieItemListener {
             override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
                 if (isFavorite) {
 
+                    // Отсюда надо убрать бизнес логику во вьмодель с помощью стейт флоу
+                    // оттуда сделать колбек сюда и здесь уже решать что произошло
                     viewModel.addtoFavorites(item)
 
                     Snackbar.make(

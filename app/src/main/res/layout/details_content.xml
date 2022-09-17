@@ -79,11 +79,21 @@
             android:text="@string/btnShare" />
 
         <Button
+            android:id="@+id/btnSchedule"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btnShare"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="Watch later" />
+
+        <Button
             android:id="@+id/btnBack"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/btnShare"
+            android:layout_below="@id/btnSchedule"
+            android:layout_marginTop="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:text="@string/btn_Back" />

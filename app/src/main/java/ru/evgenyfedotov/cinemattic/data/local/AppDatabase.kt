@@ -13,7 +13,7 @@ import ru.evgenyfedotov.cinemattic.model.PagingKeys
         MovieItem::class,
         FavoriteMovieItem::class,
         PagingKeys::class
-    ], version = 9
+    ], version = 10
 )
 abstract class AppDatabase : RoomDatabase() {
 

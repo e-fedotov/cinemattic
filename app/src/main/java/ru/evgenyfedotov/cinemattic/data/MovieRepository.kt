@@ -25,9 +25,9 @@ class MovieRepository @Inject constructor(
     private val getTopMoviesPagingSource: GetTopMoviesPagingSource
 ) {
 
-    fun getPagingMovies(): Flow<PagingData<MovieItem>> {
-        return remoteDataSource.getTopMoviesPagingFlow()
-    }
+//    fun getPagingMovies(): Flow<PagingData<MovieItem>> {
+//        return remoteDataSource.getTopMoviesPagingFlow()
+//    }
 
     fun getPagingMoviesCached(): Flow<PagingData<MovieItem>> {
         return remoteDataSource.getPagingMoviesDb()
@@ -51,6 +51,15 @@ class MovieRepository @Inject constructor(
             emit(newResult)
 
         }.distinctUntilChanged()
+            .flowOn(Dispatchers.IO)
+    }
+
+    suspend fun getMovieById(id: Int): Flow<Result<MovieByIdResponse>?> {
+        return flow {
+            val result = remoteDataSource.fetchMovieById(id)
+            emit(result)
+        }
+            .distinctUntilChanged()
             .flowOn(Dispatchers.IO)
     }
 
