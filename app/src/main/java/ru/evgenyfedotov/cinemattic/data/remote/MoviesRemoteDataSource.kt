@@ -22,13 +22,6 @@ class MoviesRemoteDataSource @Inject constructor(
 
     private val apiService = retrofit.create(MovieDatabaseAPI::class.java)
 
-    fun getTopMoviesPagingFlow(pagingConfig: PagingConfig = getDefaultPageConfig()): Flow<PagingData<MovieItem>> {
-        return Pager(
-            config = pagingConfig,
-            pagingSourceFactory = { GetTopMoviesPagingSource(retrofit) }
-        ).flow
-    }
-
     @OptIn(ExperimentalPagingApi::class)
     fun getPagingMoviesDb(pagingConfig: PagingConfig = getDefaultPageConfig()): Flow<PagingData<MovieItem>> {
         val pagingSourceFactory = { appDatabase.movieCacheDao().getMoviesPageFactory() }
@@ -41,14 +34,6 @@ class MoviesRemoteDataSource @Inject constructor(
 
     fun getDefaultPageConfig(): PagingConfig {
         return PagingConfig(pageSize = 10, initialLoadSize = 30, enablePlaceholders = true)
-    }
-
-
-    suspend fun fetchTopMovies(page: Int): Result<MovieSearchResponse> {
-        return getResponse(
-            request = { apiService.getTopMovies("TOP_250_BEST_FILMS", page) },
-            defaultErrorMessage = "Could not get Top movies from server"
-        )
     }
 
     suspend fun fetchMovieById(id: Int): Result<MovieByIdResponse> {

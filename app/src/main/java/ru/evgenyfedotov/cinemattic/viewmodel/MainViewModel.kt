@@ -24,6 +24,7 @@ class MainViewModel(private val movieRepository: MovieRepository) : ViewModel() 
 
     private val mToastStateFlow = MutableStateFlow(ToastStates.NO_TOAST)
     val toastStateFlow = mToastStateFlow.asStateFlow()
+
     var currentActionableMovieItem: MovieItem? = null
     var currentPosition = 0
 
