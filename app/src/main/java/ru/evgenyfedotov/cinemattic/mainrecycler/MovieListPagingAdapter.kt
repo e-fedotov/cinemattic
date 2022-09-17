@@ -12,7 +12,7 @@ import ru.evgenyfedotov.cinemattic.R
 import ru.evgenyfedotov.cinemattic.mainrecycler.MovieListPagingAdapter.Companion.REPO_COMPARATOR
 import ru.evgenyfedotov.cinemattic.model.MovieItem
 
-class MovieListPagingAdapter(private val lifecycleOwner: LifecycleOwner, private val favoriteMoviesList: LiveData<List<MovieItem>>, private val listener: MovieItemListener) :
+class MovieListPagingAdapter(private val listener: MovieItemListener) :
     PagingDataAdapter<MovieItem, MovieListViewHolder>(REPO_COMPARATOR) {
 
     private var isFavorite = false
@@ -23,7 +23,7 @@ class MovieListPagingAdapter(private val lifecycleOwner: LifecycleOwner, private
                 oldItem.filmId == newItem.filmId
 
             override fun areContentsTheSame(oldItem: MovieItem, newItem: MovieItem): Boolean =
-                oldItem.filmId == newItem.filmId
+                oldItem == newItem
         }
     }
 
@@ -33,13 +33,13 @@ class MovieListPagingAdapter(private val lifecycleOwner: LifecycleOwner, private
     }
 
     override fun onBindViewHolder(holder: MovieListViewHolder, position: Int) {
-        val currentMovieId = getItem(position)?.filmId
-        favoriteMoviesList.observe(lifecycleOwner) { favorites ->
-            val findCurrentMovieInFavorites = favorites.find { item -> item.filmId == currentMovieId }
-            isFavorite = findCurrentMovieInFavorites?.filmId == currentMovieId
-        }
+//        val currentMovieId = getItem(position)?.filmId
+//        favoriteMoviesList.observe(lifecycleOwner) { favorites ->
+//            val findCurrentMovieInFavorites = favorites.find { item -> item.filmId == currentMovieId }
+//            isFavorite = findCurrentMovieInFavorites?.filmId == currentMovieId
+//        }
         getItem(position)?.let {
-            holder.bind(movie = it, isFavorite, listener)
+            holder.bind(movie = it, listener)
         }
     }
 

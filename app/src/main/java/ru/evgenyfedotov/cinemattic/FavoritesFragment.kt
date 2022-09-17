@@ -63,7 +63,7 @@ class FavoritesFragment : Fragment() {
     private fun initRecycler(view: View) {
         recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
 
-        adapter = MovieListAdapter(items = favoriteMovies, favoriteMoviesList = viewModel.favoriteMovies, lifecycleOwner = viewLifecycleOwner, listener = object : MovieItemListener {
+        adapter = MovieListAdapter(items = favoriteMovies, listener = object : MovieItemListener {
             override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
                 removeFromFavorites(item)
 //                adapter.notifyDataSetChanged()

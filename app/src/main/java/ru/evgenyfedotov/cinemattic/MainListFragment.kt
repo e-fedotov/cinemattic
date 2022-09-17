@@ -2,6 +2,7 @@ package ru.evgenyfedotov.cinemattic
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -38,25 +39,52 @@ class MainListFragment : Fragment() {
     @Inject
     lateinit var mainViewModelFactory: MainViewModelFactory
     private val viewModel: MainViewModel by viewModels { mainViewModelFactory }
-    private lateinit var adapter: MovieListPagingAdapter
-
-    //    private lateinit var adapter: MovieListAdapter
+    private val adapter = MovieListPagingAdapter(listener = object : MovieItemListener {
+        override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
+            viewModel.onFavoriteClickManager(item, isFavorite, position)
+        }
+    })
     private lateinit var recyclerView: RecyclerView
     private val list = ArrayList<MovieItem>()
     private lateinit var layoutManager: LinearLayoutManager
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
+        DaggerMainListFragmentComponent.builder().applicationComponent(App.getAppInstance()).build()
+            .inject(this)
+
+        lifecycleScope.launch {
+            viewModel.getPagingMovies().collectLatest { data ->
+                Log.d("Create", "onCreateView: create")
+                adapter.submitData(lifecycle, data)
+            }
+        }
+
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_main_list, container, false)
-
-        DaggerMainListFragmentComponent.builder().applicationComponent(App.getAppInstance()).build()
-            .inject(this)
+//
+//        DaggerMainListFragmentComponent.builder().applicationComponent(App.getAppInstance()).build()
+//            .inject(this)
         initRecycler(view)
+        Log.d("MainList", "onCreateView: HERE!")
 
-//        viewModel.fetchTopMovies(1)
+
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+//                viewModel.getPagingMovies().collectLatest { data ->
+//                    Log.d("Create", "onCreateView: create")
+//                    adapter.submitData(viewLifecycleOwner.lifecycle, data)
+//                }
+//            }
+////            viewModel.getPagingMovies().distinctUntilChanged().collectLatest { data ->
+////                adapter.submitData(lifecycle, data)
+////            }
+//        }
 
         return view
     }
@@ -86,7 +114,7 @@ class MainListFragment : Fragment() {
                     else -> null
                 }
                 error?.let {
-                   Snackbar.make(view, it.error.message ?: "Could not get items", Snackbar.LENGTH_LONG).setAction("Retry") {
+                   Snackbar.make(requireView(), it.error.message ?: "Could not get items", Snackbar.LENGTH_LONG).setAction("Retry") {
                        adapter.retry()
                    }
                        .setAnchorView(view.rootView.findViewById(R.id.bottomNavigation))
@@ -111,14 +139,16 @@ class MainListFragment : Fragment() {
 //            }
 //        }
 
-        lifecycleScope.launch {
-            viewModel.getPagingMovies().asLiveData().observe(viewLifecycleOwner) { data ->
-                adapter.submitData(lifecycle, data)
-            }
-//            viewModel.getPagingMovies().distinctUntilChanged().collectLatest { data ->
-//                adapter.submitData(lifecycle, data)
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                viewModel.getPagingMovies().collectLatest { data ->
+//                    adapter.submitData(viewLifecycleOwner.lifecycle, data)
+//                }
 //            }
-        }
+////            viewModel.getPagingMovies().distinctUntilChanged().collectLatest { data ->
+////                adapter.submitData(lifecycle, data)
+////            }
+//        }
 
         lifecycleScope.launch {
             viewModel.toastStateFlow.collect {
@@ -152,49 +182,13 @@ class MainListFragment : Fragment() {
 
     private fun initRecycler(view: View) {
         recyclerView = view.findViewById(R.id.recyclerView)
-
-        // В адаптер надо добавлять лайвдату с избранными фильмами из вьюмодели
-        adapter = MovieListPagingAdapter(listener = object : MovieItemListener {
-            override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
-                viewModel.onFavoriteClickManager(item, isFavorite, position)
-//                if (!isFavorite) {
 //
-//                    // Отсюда надо убрать бизнес логику во вьмодель с помощью стейт флоу
-//                    // оттуда сделать колбек сюда и здесь уже решать что произошло
-//                    viewModel.addToFavorites(item)
+//        adapter = MovieListPagingAdapter(listener = object : MovieItemListener {
+//            override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
+//                viewModel.onFavoriteClickManager(item, isFavorite, position)
+//            }
 //
-//                    Snackbar.make(
-//                        view.findViewById(R.id.constraintLayout),
-//                        getString(R.string.snackbar_favorites_added),
-//                        Snackbar.LENGTH_LONG
-//                    )
-//                        .setAction(getString(R.string.undo)) {
-//                            viewModel.removeFromFavorites(item)
-//                            adapter.retry()
-////                            recyclerView.adapter?.notifyItemChanged(position)
-//
-//                        }
-//                        .setAnchorView(view.rootView.findViewById(R.id.bottomNavigation))
-//                        .show()
-//
-//                } else {
-//                    viewModel.removeFromFavorites(item)
-//                    Snackbar.make(
-//                        view.findViewById(R.id.constraintLayout),
-//                        getString(R.string.snackbar_favorites_removed),
-//                        Snackbar.LENGTH_LONG
-//                    )
-//                        .setAction(getString(R.string.undo)) {
-//                            viewModel.addToFavorites(item)
-////                            recyclerView.adapter?.notifyItemChanged(position)
-//                            adapter.notifyItemChanged(position)
-//                        }
-//                        .setAnchorView(view.rootView.findViewById(R.id.bottomNavigation))
-//                        .show()
-//                }
-            }
-
-        }, lifecycleOwner = viewLifecycleOwner, favoriteMoviesList = viewModel.favoriteMovies)
+//        }, lifecycleOwner = viewLifecycleOwner, favoriteMoviesList = viewModel.favoriteMovies)
 
         layoutManager = when (resources.configuration.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> GridLayoutManager(view.context, 2)

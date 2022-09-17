@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -70,7 +71,6 @@ class DetailsFragment : Fragment() {
         val btnSchedule: Button = view.findViewById(R.id.btnSchedule)
         val toolbar: Toolbar = view.findViewById(R.id.toolbar)
 
-
         val movieId = arguments?.getString(MainActivity.MOVIE_ID)?.toInt()
         movieId?.let { id ->
             viewModel.getMovieById(id)
@@ -82,6 +82,12 @@ class DetailsFragment : Fragment() {
         postponeEnterTransition()
 
         viewModel.movieItem.observe(viewLifecycleOwner) { movie ->
+            if(movie == null) { // Hide all buttons if we didn't get movie info
+                commentaryField.isVisible = false
+                btnShare.isVisible        = false
+                btnSchedule.isVisible     = false
+                checkbox.isVisible        = false
+            }
             Glide.with(view)
                 .load(movie?.posterUrl)
                 .into(poster)
@@ -89,11 +95,12 @@ class DetailsFragment : Fragment() {
             poster.transitionName = movieId.toString()
             title.text = movie?.nameEn ?: movie?.nameRu
             year.text = movie?.year
-            description.text = movie?.description
+            description.text = movie?.description ?: "Could not load movie details. Please check your Internet connection"
 
             movieTitle = movie?.nameEn ?: movie?.nameRu
-            movieDescription = movie.description
+            movieDescription = movie?.description
 
+            // Toolbar setup
             toolbar.title = movie?.nameEn ?: movie?.nameRu
             toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
             toolbar.navigationIcon?.colorFilter =

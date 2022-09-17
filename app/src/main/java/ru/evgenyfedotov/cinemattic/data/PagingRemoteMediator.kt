@@ -12,6 +12,7 @@ import ru.evgenyfedotov.cinemattic.data.local.AppDatabase
 import ru.evgenyfedotov.cinemattic.model.MovieItem
 import ru.evgenyfedotov.cinemattic.model.PagingKeys
 import ru.evgenyfedotov.cinemattic.network.api.MovieDatabaseAPI
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 const val DEFAULT_PAGE = 1
@@ -29,9 +30,18 @@ class PagingRemoteMediator @Inject constructor(
 
         return try {
             val loadKey = when(loadType) {
-                LoadType.REFRESH -> 1
-                LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
+                LoadType.REFRESH -> {
+                    Log.d("paging", "load: $state")
+                    val remoteKeys = getClosestRemoteKey(state)
+                    remoteKeys?.nextKey?.minus(1) ?: 1
+                }
+                LoadType.PREPEND -> {
+                    Log.d("paging", "load: $state")
+                    val remoteKeys = getFirstRemoteKey(state)
+                    remoteKeys?.prevKey ?: return MediatorResult.Success(endOfPaginationReached = false)
+                }
                 LoadType.APPEND -> {
+                    Log.d("paging", "load: $state")
                     val lastItem = state.lastItemOrNull()
                     val remoteKey: PagingKeys? = appDatabase.withTransaction {
                         if (lastItem?.filmId != null) {
@@ -48,8 +58,6 @@ class PagingRemoteMediator @Inject constructor(
 
             val api = retrofit.create(MovieDatabaseAPI::class.java)
             val response = api.getTopMovies("TOP_250_BEST_FILMS", loadKey ?: 1)
-
-
 
             if (response.code() == 402) {
                 val jsonObject = JSONObject(response.errorBody()?.charStream()!!.readText())
@@ -76,9 +84,6 @@ class PagingRemoteMediator @Inject constructor(
                         it.isFavorite = favorites?.find { fav -> fav.filmId == it.filmId }?.filmId == it.filmId
                         appDatabase.movieCacheDao().insertMovie(it)
                     }
-//                    movies?.let {
-//                        appDatabase.movieCacheDao().insertAll(it)
-//                    }
                 }
 
                 MediatorResult.Success(endOfPaginationReached = isEndOfList == true)
@@ -87,39 +92,6 @@ class PagingRemoteMediator @Inject constructor(
         } catch (e: Exception) {
             MediatorResult.Error(e)
         }
-
-//        val pageKeyData = getKeyPageData(loadType, state)
-//        val page = when (pageKeyData) {
-//            is MediatorResult.Success -> { return pageKeyData }
-//            else -> { 1 }
-//        }
-//
-//        try {
-//            val api = retrofit.create(MovieDatabaseAPI::class.java)
-//            val response = api.getTopMovies("TOP_250_BEST_FILMS", page)
-//            val isEndOfList = response.body()?.films?.isEmpty() == true
-//            appDatabase.withTransaction {
-//                if (loadType == LoadType.REFRESH) {
-//                    appDatabase.movieCacheDao().clearAllMovies()
-//                    appDatabase.pagingKeysDao().clearAllPagingKeys()
-//                }
-//                val prevKey = if (page == DEFAULT_PAGE) null else page - 1
-//                val nextKey = if (isEndOfList == true) null else page + 1
-//                val keys = response.body()?.films?.map {
-//                    PagingKeys(it.filmId, prevKey, nextKey)
-//                }
-//                if (keys != null) {
-//                    appDatabase.pagingKeysDao().insertAll(keys)
-//                }
-//
-//                response.body()?.let { appDatabase.movieCacheDao().insertAll(it.films) }
-//            }
-//            return MediatorResult.Success(endOfPaginationReached = isEndOfList)
-//        } catch (exception: IOException) {
-//            return MediatorResult.Error(exception)
-//        } catch (exception: HttpException) {
-//            return MediatorResult.Error(exception)
-//        }
     }
 
     suspend fun getKeyPageData(loadType: LoadType, state: PagingState<Int, MovieItem>): Any? {
@@ -145,10 +117,6 @@ class PagingRemoteMediator @Inject constructor(
                     return MediatorResult.Success(endOfPaginationReached = remoteKeys != null)
                 }
                 prevKey
-//                if (remoteKeys != null) {
-//                    remoteKeys.prevKey ?: return MediatorResult.Success(endOfPaginationReached = true)
-//                }
-//                remoteKeys?.prevKey
             }
         }
     }

@@ -12,7 +12,7 @@ import ru.evgenyfedotov.cinemattic.MainListFragment
 import ru.evgenyfedotov.cinemattic.R
 import ru.evgenyfedotov.cinemattic.model.MovieItem
 
-class MovieListAdapter(private val items: MutableList<MovieItem>, private val favoriteMoviesList: LiveData<List<MovieItem>>, private val lifecycleOwner: LifecycleOwner, private val listener: MovieItemListener) :
+class MovieListAdapter(private val items: MutableList<MovieItem>, private val listener: MovieItemListener) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var isFavorite: Boolean = false
@@ -23,13 +23,13 @@ class MovieListAdapter(private val items: MutableList<MovieItem>, private val fa
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val currentMovieId = items[position].filmId
-        favoriteMoviesList.observe(lifecycleOwner) { favorites ->
-            val findCurrentMovieInFavorites = favorites.find { item -> item.filmId == currentMovieId }
-            isFavorite = findCurrentMovieInFavorites?.filmId == currentMovieId
-        }
+//        val currentMovieId = items[position].filmId
+//        favoriteMoviesList.observe(lifecycleOwner) { favorites ->
+//            val findCurrentMovieInFavorites = favorites.find { item -> item.filmId == currentMovieId }
+//            isFavorite = findCurrentMovieInFavorites?.filmId == currentMovieId
+//        }
         when (holder) {
-            is MovieListViewHolder -> holder.bind(items[position], isFavorite, listener)
+            is MovieListViewHolder -> holder.bind(items[position], listener)
         }
 
     }

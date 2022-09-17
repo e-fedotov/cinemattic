@@ -9,6 +9,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import ru.evgenyfedotov.cinemattic.FavoritesFragment
 import ru.evgenyfedotov.cinemattic.ui.FavoriteButton
 import ru.evgenyfedotov.cinemattic.MainActivity
@@ -24,11 +25,12 @@ class MovieListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val btn: Button = itemView.findViewById(R.id.detailsBtn)
     private val favBtn: FavoriteButton = itemView.findViewById(R.id.favBtn)
 
-    fun bind(movie: MovieItem, isFavorite: Boolean, listener: MovieItemListener) {
+    fun bind(movie: MovieItem, listener: MovieItemListener) {
         title.text = movie.nameEn ?: movie.nameRu
         year.text = movie.year
         Glide.with(itemView)
             .load(movie.posterUrlPreview)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(poster)
 
 //        favBtn.isChecked = isFavorite

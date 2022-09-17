@@ -84,6 +84,8 @@ class MovieRepository @Inject constructor(
 
     suspend fun getFavoriteMovies(): StateFlow<List<MovieItem>> {
 
+        // Здесь надо попробовать перейти на Flow прямо из базы
+        // и при получении нового значения флоу обновлять избранное автоматически и отсылать в VM
         var favoriteMoviesIds: List<FavoriteMovieItem>?
         val favoriteMoviesItems = mutableListOf<MovieItem>()
         withContext(Dispatchers.IO) {
