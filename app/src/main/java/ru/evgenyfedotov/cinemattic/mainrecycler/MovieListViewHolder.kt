@@ -9,6 +9,7 @@ import androidx.navigation.findNavController
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import ru.evgenyfedotov.cinemattic.FavoritesFragment
 import ru.evgenyfedotov.cinemattic.ui.FavoriteButton
 import ru.evgenyfedotov.cinemattic.MainActivity
@@ -29,12 +30,13 @@ class MovieListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         year.text = movie.year
         Glide.with(itemView)
             .load(movie.posterUrlPreview)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .into(poster)
 
-        favBtn.isChecked = MainListFragment.favoritesList.find { item -> item.filmId == movie.filmId }?.filmId == movie.filmId
-
+//        favBtn.isChecked = isFavorite
+        favBtn.isChecked = movie.isFavorite
         favBtn.setOnClickListener {
-            listener.onFavoriteClick(movie, favBtn.isChecked, bindingAdapterPosition)
+            listener.onFavoriteClick(movie, !favBtn.isChecked, bindingAdapterPosition)
         }
 
         btn.setOnClickListener { view ->

@@ -6,5 +6,6 @@ data class MovieSearchResponse(
     @SerializedName("keyword") val keyword: String?,
     @SerializedName("pagesCount") val pagesCount: Int,
     @SerializedName("searchFilmsCountResult") val searchFilmsCountResult: Int?,
-    @SerializedName("films") val films: List<MovieItem>
+    @SerializedName("films") val films: List<MovieItem>,
+    @SerializedName("message") val message: String?
 )

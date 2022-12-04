@@ -18,6 +18,9 @@ interface PagingKeysDao {
     @Query("SELECT * FROM pagingkeys WHERE keyId LIKE :keyId")
     suspend fun getPagingKeyId(keyId: Int): PagingKeys?
 
+    @Query("SELECT * FROM pagingkeys ORDER BY keyId DESC LIMIT 1")
+    suspend fun getLatestKey(): PagingKeys?
+
     @Query("DELETE FROM pagingkeys")
     suspend fun clearAllPagingKeys()
 

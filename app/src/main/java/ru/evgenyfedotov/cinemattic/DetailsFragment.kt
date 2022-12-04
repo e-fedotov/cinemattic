@@ -1,51 +1,34 @@
 package ru.evgenyfedotov.cinemattic
 
 import android.app.AlarmManager
-import android.app.DatePickerDialog
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
-import android.text.format.DateUtils
-import android.text.style.TtsSpan
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.transition.ChangeBounds
 import androidx.transition.TransitionInflater
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.WorkRequest
-import androidx.work.impl.background.systemalarm.SystemAlarmService
-import androidx.work.workDataOf
 import com.bumptech.glide.Glide
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat.CLOCK_24H
 import ru.evgenyfedotov.cinemattic.di.DaggerDetailsFragmentComponent
-import ru.evgenyfedotov.cinemattic.di.DaggerFavoritesFragmentComponent
-import ru.evgenyfedotov.cinemattic.model.MovieItem
 import ru.evgenyfedotov.cinemattic.viewmodel.DetailsViewModel
 import ru.evgenyfedotov.cinemattic.viewmodel.DetailsViewModelFactory
 import ru.evgenyfedotov.cinemattic.workers.AlarmNotificationReceiver
-import ru.evgenyfedotov.cinemattic.workers.ReminderWorker
 import java.util.*
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class DetailsFragment : Fragment() {
@@ -88,7 +71,6 @@ class DetailsFragment : Fragment() {
         val btnSchedule: Button = view.findViewById(R.id.btnSchedule)
         val toolbar: Toolbar = view.findViewById(R.id.toolbar)
 
-
         val movieId = arguments?.getString(MainActivity.MOVIE_ID)?.toInt()
         movieId?.let { id ->
             viewModel.getMovieById(id)
@@ -100,6 +82,12 @@ class DetailsFragment : Fragment() {
         postponeEnterTransition()
 
         viewModel.movieItem.observe(viewLifecycleOwner) { movie ->
+            if(movie == null) { // Hide all buttons if we didn't get movie info
+                commentaryField.isVisible = false
+                btnShare.isVisible        = false
+                btnSchedule.isVisible     = false
+                checkbox.isVisible        = false
+            }
             Glide.with(view)
                 .load(movie?.posterUrl)
                 .into(poster)
@@ -107,11 +95,12 @@ class DetailsFragment : Fragment() {
             poster.transitionName = movieId.toString()
             title.text = movie?.nameEn ?: movie?.nameRu
             year.text = movie?.year
-            description.text = movie?.description
+            description.text = movie?.description ?: "Could not load movie details. Please check your Internet connection"
 
             movieTitle = movie?.nameEn ?: movie?.nameRu
-            movieDescription = movie.description
+            movieDescription = movie?.description
 
+            // Toolbar setup
             toolbar.title = movie?.nameEn ?: movie?.nameRu
             toolbar.setNavigationIcon(androidx.appcompat.R.drawable.abc_ic_ab_back_material)
             toolbar.navigationIcon?.colorFilter =

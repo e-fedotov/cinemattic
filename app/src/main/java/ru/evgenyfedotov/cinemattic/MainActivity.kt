@@ -15,7 +15,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.messaging.FirebaseMessaging
-import ru.evgenyfedotov.cinemattic.workers.ReminderWorker.Companion.CHANNEL_ID
+import ru.evgenyfedotov.cinemattic.workers.AlarmNotificationReceiver.Companion.CHANNEL_ID
 
 
 class MainActivity : AppCompatActivity() {

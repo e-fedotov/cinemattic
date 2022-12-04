@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "170516072200",
+    "project_id": "cinemattic-883c8",
+    "storage_bucket": "cinemattic-883c8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:170516072200:android:bb7ea5b4af59c593b28ebd",
+        "android_client_info": {
+          "package_name": "ru.evgenyfedotov.cinemattic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "170516072200-6i0qvtckrt49aemc7c6kr6bphfnfg7p7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1FM_-b0s6OxOeggT--S3bTKpGnRq3du8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "170516072200-6i0qvtckrt49aemc7c6kr6bphfnfg7p7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,6 +2,7 @@ package ru.evgenyfedotov.cinemattic
 
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -12,7 +13,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.paging.LoadState
@@ -20,13 +21,13 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import ru.evgenyfedotov.cinemattic.di.DaggerMainListFragmentComponent
 import ru.evgenyfedotov.cinemattic.mainrecycler.*
 import ru.evgenyfedotov.cinemattic.model.MovieItem
-import ru.evgenyfedotov.cinemattic.model.Result
 import ru.evgenyfedotov.cinemattic.viewmodel.MainViewModel
 import ru.evgenyfedotov.cinemattic.viewmodel.MainViewModelFactory
 import javax.inject.Inject
@@ -38,26 +39,52 @@ class MainListFragment : Fragment() {
     @Inject
     lateinit var mainViewModelFactory: MainViewModelFactory
     private val viewModel: MainViewModel by viewModels { mainViewModelFactory }
-    private lateinit var adapter: MovieListPagingAdapter
-
-    //    private lateinit var adapter: MovieListAdapter
+    private val adapter = MovieListPagingAdapter(listener = object : MovieItemListener {
+        override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
+            viewModel.onFavoriteClickManager(item, isFavorite, position)
+        }
+    })
     private lateinit var recyclerView: RecyclerView
     private val list = ArrayList<MovieItem>()
-    private lateinit var scrollListener: EndlessRecyclerViewScrollListenerImpl
-    lateinit var layoutManager: LinearLayoutManager
+    private lateinit var layoutManager: LinearLayoutManager
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
+        DaggerMainListFragmentComponent.builder().applicationComponent(App.getAppInstance()).build()
+            .inject(this)
+
+        lifecycleScope.launch {
+            viewModel.getPagingMovies().collectLatest { data ->
+                Log.d("Create", "onCreateView: create")
+                adapter.submitData(lifecycle, data)
+            }
+        }
+
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_main_list, container, false)
-
-        DaggerMainListFragmentComponent.builder().applicationComponent(App.getAppInstance()).build()
-            .inject(this)
+//
+//        DaggerMainListFragmentComponent.builder().applicationComponent(App.getAppInstance()).build()
+//            .inject(this)
         initRecycler(view)
+        Log.d("MainList", "onCreateView: HERE!")
 
-//        viewModel.fetchTopMovies(1)
+
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+//                viewModel.getPagingMovies().collectLatest { data ->
+//                    Log.d("Create", "onCreateView: create")
+//                    adapter.submitData(viewLifecycleOwner.lifecycle, data)
+//                }
+//            }
+////            viewModel.getPagingMovies().distinctUntilChanged().collectLatest { data ->
+////                adapter.submitData(lifecycle, data)
+////            }
+//        }
 
         return view
     }
@@ -67,33 +94,65 @@ class MainListFragment : Fragment() {
 
         val loading = view.findViewById<ProgressBar>(R.id.loading)
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+//
+//        viewModel.favoriteMovies.observe(viewLifecycleOwner) {
+//            favoritesList.clear()
+//            it.forEach {
+//                favoritesList.add(it)
+//            }
+//        }
 
-        viewModel.favoriteMovies.observe(viewLifecycleOwner) {
-            favoritesList.clear()
-            it.forEach {
-                favoritesList.add(it)
-            }
-        }
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                adapter.loadStateFlow.collect {
-                    loading.isVisible = it.source.append is LoadState.Loading
-                    loading.isVisible = it.source.prepend is LoadState.Loading
-
-                    if (it.source.append is LoadState.Error || it.source.prepend is LoadState.Error) {
-                        Snackbar.make(view, "Could not get items, try again", Snackbar.LENGTH_LONG)
-                            .setAction("Retry") {
-                                adapter.retry()
-                            }
-                    }
+        adapter.addLoadStateListener { loadState ->
+            if (loadState.source.refresh is LoadState.Loading) {
+                loading.isVisible = true
+            } else {
+                loading.isVisible = false
+                val error = when {
+                    loadState.prepend is LoadState.Error -> loadState.prepend as LoadState.Error
+                    loadState.append  is LoadState.Error -> loadState.append  as LoadState.Error
+                    loadState.refresh is LoadState.Error -> loadState.refresh as LoadState.Error
+                    else -> null
+                }
+                error?.let {
+                   Snackbar.make(requireView(), it.error.message ?: "Could not get items", Snackbar.LENGTH_LONG).setAction("Retry") {
+                       adapter.retry()
+                   }
+                       .setAnchorView(view.rootView.findViewById(R.id.bottomNavigation))
+                       .show()
                 }
             }
+
         }
+//        lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                adapter.loadStateFlow.collect {
+//                    loading.isVisible = it.source.append is LoadState.Loading
+//                    loading.isVisible = it.source.prepend is LoadState.Loading
+//
+//                    if (it.source.append is LoadState.Error || it.source.prepend is LoadState.Error) {
+//                        Snackbar.make(view, "Could not get items, try again", Snackbar.LENGTH_LONG)
+//                            .setAction("Retry") {
+//                                adapter.retry()
+//                            }
+//                    }
+//                }
+//            }
+//        }
+
+//        viewLifecycleOwner.lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                viewModel.getPagingMovies().collectLatest { data ->
+//                    adapter.submitData(viewLifecycleOwner.lifecycle, data)
+//                }
+//            }
+////            viewModel.getPagingMovies().distinctUntilChanged().collectLatest { data ->
+////                adapter.submitData(lifecycle, data)
+////            }
+//        }
 
         lifecycleScope.launch {
-            viewModel.getPagingMovies().distinctUntilChanged().collectLatest { data ->
-                adapter.submitData(lifecycle, data)
+            viewModel.toastStateFlow.collect {
+                makeSnackbar(requireView(), it)
             }
         }
 
@@ -123,62 +182,61 @@ class MainListFragment : Fragment() {
 
     private fun initRecycler(view: View) {
         recyclerView = view.findViewById(R.id.recyclerView)
-
-        // В адаптер надо добавлять лайвдату с избранными фильмами из вьюмодели
-        adapter = MovieListPagingAdapter(object : MovieItemListener {
-            override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
-                if (isFavorite) {
-
-                    // Отсюда надо убрать бизнес логику во вьмодель с помощью стейт флоу
-                    // оттуда сделать колбек сюда и здесь уже решать что произошло
-                    viewModel.addtoFavorites(item)
-
-                    Snackbar.make(
-                        view.findViewById(R.id.constraintLayout),
-                        getString(R.string.snackbar_favorites_added),
-                        Snackbar.LENGTH_LONG
-                    )
-                        .setAction(getString(R.string.undo)) {
-                            viewModel.removeFromFavorites(item)
-                            recyclerView.adapter?.notifyItemChanged(position)
-                        }
-                        .setAnchorView(view.rootView.findViewById(R.id.bottomNavigation))
-                        .show()
-
-                } else {
-                    viewModel.removeFromFavorites(item)
-                    Snackbar.make(
-                        view.findViewById(R.id.constraintLayout),
-                        getString(R.string.snackbar_favorites_removed),
-                        Snackbar.LENGTH_LONG
-                    )
-                        .setAction(getString(R.string.undo)) {
-                            viewModel.addtoFavorites(item)
-                            recyclerView.adapter?.notifyItemChanged(position)
-                        }
-                        .setAnchorView(view.rootView.findViewById(R.id.bottomNavigation))
-                        .show()
-                }
-            }
-
-        })
+//
+//        adapter = MovieListPagingAdapter(listener = object : MovieItemListener {
+//            override fun onFavoriteClick(item: MovieItem, isFavorite: Boolean, position: Int) {
+//                viewModel.onFavoriteClickManager(item, isFavorite, position)
+//            }
+//
+//        }, lifecycleOwner = viewLifecycleOwner, favoriteMoviesList = viewModel.favoriteMovies)
 
         layoutManager = when (resources.configuration.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> GridLayoutManager(view.context, 2)
             else -> LinearLayoutManager(view.context, LinearLayoutManager.VERTICAL, false)
         }
 
-//        scrollListener = EndlessRecyclerViewScrollListenerImpl(layoutManager, viewModel)
-
         recyclerView.adapter = adapter
         recyclerView.layoutManager = layoutManager
 
-//        recyclerView.addOnScrollListener(scrollListener)
     }
 
     override fun onStart() {
         super.onStart()
         (activity as AppCompatActivity).supportActionBar?.title = getString(R.string.app_name)
+    }
+
+    private fun makeSnackbar(view: View, toastStates: MainViewModel.ToastStates) {
+        when (toastStates) {
+            MainViewModel.ToastStates.ADD_FAVORITES ->
+                Snackbar.make(
+                    view.findViewById(R.id.constraintLayout),
+                    getString(R.string.snackbar_favorites_added),
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAction(getString(R.string.undo)) {
+                        viewModel.removeFromFavorites(viewModel.currentActionableMovieItem!!)
+                        adapter.snapshot().get(viewModel.currentPosition)?.isFavorite = false
+                        recyclerView.adapter?.notifyDataSetChanged()
+                    }
+                    .setAnchorView(view.rootView.findViewById(R.id.bottomNavigation))
+                    .show()
+
+            MainViewModel.ToastStates.REMOVE_FAVORITES ->
+                Snackbar.make(
+                    view.findViewById(R.id.constraintLayout),
+                    getString(R.string.snackbar_favorites_removed),
+                    Snackbar.LENGTH_LONG
+                )
+                    .setAction(getString(R.string.undo)) {
+                        viewModel.addToFavorites(viewModel.currentActionableMovieItem!!)
+                        adapter.snapshot().get(viewModel.currentPosition)?.isFavorite = true
+                        recyclerView.adapter?.notifyDataSetChanged()
+                    }
+                    .setAnchorView(view.rootView.findViewById(R.id.bottomNavigation))
+                    .show()
+
+            MainViewModel.ToastStates.NO_TOAST -> return
+        }
     }
 
     companion object {
